@@ -26,3 +26,12 @@ nav ul li a {
     text-decoration: none;
     font-size: 1.2em;
 }
+
+#solar-system-container {
+    cursor: grab;
+    user-select: none;
+}
+
+#solar-system-container:active {
+    cursor: grabbing;
+}

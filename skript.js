@@ -6,6 +6,27 @@ let solarSystemContainer;
 // Vytvořte globální loader pro textury
 const textureLoader = new THREE.TextureLoader();
 
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+let cameraDistance = 300;
+const minDistance = 50;
+const maxDistance = 1500;
+const cameraSpeed = 0.005;
+// Inicializujte kamera parametry
+let cameraTheta = 0; // horizontální úhel
+let cameraPhi = Math.PI / 2; // vertikální úhel (90° = shora)
+let cameraRadius = 300; // počáteční vzdálenost
+
+function updateCameraPosition() {
+    // Přepočítej pozici kamery ze sférických souřadnic
+    const x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+    const y = cameraRadius * Math.cos(cameraPhi);
+    const z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+    
+    camera.position.set(x, y, z);
+    camera.lookAt(new THREE.Vector3(0, 0, 0)); // Střed = Slunce
+}
+
 class PlanetTrail {
     constructor(color) {
         this.points = [];
@@ -40,10 +61,56 @@ function initSolarSystem() {
             75,
             solarSystemContainer.clientWidth / solarSystemContainer.clientHeight,
             0.1,
-            2000
+            5000
         );
-        camera.position.set(0, 100, 300);
-        camera.lookAt(0, 0, 0);
+        updateCameraPosition();
+        camera.lookAt(new THREE.Vector3(0,0,0));
+
+        // Ovládání myší
+        const onMouseDown = (event) => {
+            isDragging = true;
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        };
+
+        const onMouseUp = () => {
+            isDragging = false;
+        };
+
+        const onMouseMove = (event) => {
+            if (!isDragging) return;
+
+            const delta = {
+                x: event.clientX - previousMousePosition.x,
+                y: event.clientY - previousMousePosition.y
+            };
+
+            // Rotace kamery
+            cameraTheta -= delta.x * cameraSpeed;
+            cameraPhi -= delta.y * cameraSpeed * 0.5;
+            
+            // Omezení vertikálního úhlu (0.1π až 0.9π)
+            cameraPhi = Math.max(0.1 * Math.PI, Math.min(0.9 * Math.PI, cameraPhi));
+            
+            updateCameraPosition();
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        };
+
+        const onWheel = (event) => {
+            // Zoom kolečkem myši
+            cameraRadius += event.deltaY * -0.1;
+            cameraRadius = Math.min(maxDistance, Math.max(minDistance, cameraRadius));
+            updateCameraPosition();
+        };
+
+        solarSystemContainer.addEventListener('mousedown', onMouseDown);
+        solarSystemContainer.addEventListener('mouseup', onMouseUp);
+        solarSystemContainer.addEventListener('mouseleave', onMouseUp);
+        solarSystemContainer.addEventListener('mousemove', onMouseMove);
+        solarSystemContainer.addEventListener('wheel', onWheel);
+        solarSystemContainer.addEventListener('contextmenu', (e) => e.preventDefault());
 
         // Renderer
         renderer = new THREE.WebGLRenderer({ antialias: true });
