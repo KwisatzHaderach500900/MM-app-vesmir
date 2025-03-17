@@ -1,31 +1,28 @@
 body {
+    margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #000;
-    color: #fff;
+    background-color: #1a1a1a;
+    color: white;
 }
 
 header {
     text-align: center;
     padding: 20px;
+    background-color: #2a2a2a;
 }
 
 nav ul {
-    list-style: none;
     padding: 0;
+    list-style: none;
 }
 
 nav ul li {
-    display: inline;
-    margin: 0 10px;
+    display: inline-block;
+    margin: 0 15px;
 }
 
 nav ul li a {
-    color: #fff;
+    color: white;
     text-decoration: none;
-}
-
-#planet-container {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
+    font-size: 1.2em;
 }
