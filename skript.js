@@ -6,6 +6,28 @@ let solarSystemContainer;
 // Vytvořte globální loader pro textury
 const textureLoader = new THREE.TextureLoader();
 
+class PlanetTrail {
+    constructor(color) {
+        this.points = [];
+        this.trailLength = 500;
+        this.geometry = new THREE.BufferGeometry();
+        this.material = new THREE.LineBasicMaterial({ color: color, linewidth: 1 });
+        this.line = new THREE.Line(this.geometry, this.material);
+    }
+
+    update(position) {
+        // Přidání nové pozice
+        this.points.push(position.clone());
+        if (this.points.length > this.trailLength) {
+            this.points.shift();
+        }
+        
+        // Aktualizace geometrie
+        this.geometry.setFromPoints(this.points);
+        this.geometry.verticesNeedUpdate = true;
+    }
+}
+
 function initSolarSystem() {
     try {
         const solarSystemContainer = document.getElementById("solar-system-container");
@@ -18,9 +40,9 @@ function initSolarSystem() {
             75,
             solarSystemContainer.clientWidth / solarSystemContainer.clientHeight,
             0.1,
-            1000
+            2000
         );
-        camera.position.set(0, 50, 200);
+        camera.position.set(0, 100, 300);
         camera.lookAt(0, 0, 0);
 
         // Renderer
@@ -50,14 +72,78 @@ function initSolarSystem() {
 
         // Planety
         const planets = [
-            { name: "Merkur", radius: 3.5, distance: 25, speed: 0.02, texture: 'textures/2k_mercury.jpg' },
-            { name: "Venuše", radius: 6.8, distance: 40, speed: 0.015, texture: 'textures/2k_venus_surface.jpg'},
-            { name: "Země", radius: 7, distance: 60, speed: 0.01, texture: 'textures/2k_earth_daymap.jpg'},
-            { name: "Mars", radius: 5.5, distance: 80, speed: 0.008, texture: 'textures/2k_mars.jpg'},
-            { name: "Jupiter", radius: 11, distance: 110, speed: 0.005, texture: 'textures/2k_jupiter.jpg'},
-            { name: "Saturn", radius: 10, distance: 140, speed: 0.004, texture: 'textures/2k_saturn.jpg'},
-            { name: "Uran", radius: 9, distance: 170, speed: 0.003, texture: 'textures/2k_uranus.jpg'},
-            { name: "Neptun", radius: 8.5, distance: 200, speed: 0.002,texture: 'textures/2k_neptune.jpg' }
+            {   name: "Merkur", 
+                radius: 3.5, 
+                semiMajorAxis: 58, 
+                eccentricity: 0.2056, 
+                inclination: 7.0 * Math.PI/180,
+                speed: 0.0479,
+                texture: 'textures/2k_mercury.jpg',
+                color: 0x999999
+            },
+            {   name: "Venuše", 
+                radius: 6.8, 
+                semiMajorAxis: 108, 
+                eccentricity: 0.0068, 
+                inclination: 3.39 * Math.PI/180,
+                speed: 0.0350,
+                texture: 'textures/2k_venus_surface.jpg',
+                color: 0x999999
+            },
+            {   name: "Země", 
+                radius: 7, 
+                semiMajorAxis: 150,
+                eccentricity: 0.0167,
+                inclination: 0.00005 * Math.PI/180,      
+                speed: 0.01, 
+                texture: 'textures/2k_earth_daymap.jpg',
+                color: 0x999999
+            },
+            {   name: "Mars", 
+                radius: 5.5, 
+                semiMajorAxis: 228,
+                eccentricity: 0.0934,
+                inclination: 1.85 * Math.PI/180, 
+                speed: 0.008, 
+                texture: 'textures/2k_mars.jpg',
+                color: 0x999999
+            },
+            {   name: "Jupiter", 
+                radius: 11, 
+                semiMajorAxis: 300,
+                eccentricity: 0.0489,
+                inclination: 1.304 * Math.PI/180, 
+                speed: 0.005, 
+                texture: 'textures/2k_jupiter.jpg',
+                color: 0x999999
+            },
+            {   name: "Saturn", 
+                radius: 10, 
+                semiMajorAxis: 500,
+                eccentricity: 0.0565,
+                inclination: 2.485 * Math.PI/180,  
+                speed: 0.004, 
+                texture: 'textures/2k_saturn.jpg',
+                color: 0x999999
+            },
+            {   name: "Uran", 
+                radius: 9, 
+                semiMajorAxis: 700,
+                eccentricity: 0.0463,
+                inclination: 0.772 * Math.PI/180, 
+                speed: 0.003, 
+                texture: 'textures/2k_uranus.jpg',
+                color: 0x999999
+            },
+            {   name: "Neptun", 
+                radius: 8.5, 
+                semiMajorAxis: 900,
+                eccentricity: 0.0095,
+                inclination: 1.769 * Math.PI/180, 
+                speed: 0.002,
+                texture: 'textures/2k_neptune.jpg',
+                color: 0x999999
+            }
         ];
 
         planets.forEach(planet => {
@@ -79,25 +165,47 @@ function initSolarSystem() {
             mesh.position.x = planet.distance;
             mesh.userData = planet;
             scene.add(mesh);
+
+            // Inicializace stopy
+            mesh.userData.trail = new PlanetTrail(planet.color);
+            scene.add(mesh.userData.trail.line);
+            scene.add(mesh);
         });
 
         // Animace
         let time = 0;
         function animate() {
             requestAnimationFrame(animate);
-            const time = Date.now() * 0.1;
+            const time = Date.now() * 0.05;
 
             sun.rotation.y -= 0.005;
 
             scene.children.forEach(child => {
                 if (child !== sun && child instanceof THREE.Mesh) {
                     const planetData = child.userData;
-                    child.position.x = Math.cos(time * planetData.speed) * planetData.distance;
-                    child.position.z = Math.sin(time * planetData.speed) * planetData.distance;
+
+                    // Výpočet eliptické dráhy
+                    const angle = time * planetData.speed;
+                    const r = planetData.semiMajorAxis * (1 - planetData.eccentricity**2) / 
+                            (1 + planetData.eccentricity * Math.cos(angle));
+                    
+                    // Základní pozice v orbitální rovině
+                    const x = r * Math.cos(angle);
+                    const z = r * Math.sin(angle);
+                    
+                    // Aplikace náklonu dráhy
+                    const y = Math.sin(angle) * Math.sin(planetData.inclination) * r;
+                    
+                    // Rotace pozice podle sklonu
+                    child.position.set(x, y, z);
                     child.rotation.y += 0.01;
+
+                    // Aktualizace stopy
+                    planetData.trail.update(child.position);
                 }
             });
 
+            camera.lookAt(sun.position);
             renderer.render(scene, camera);
         }
 
