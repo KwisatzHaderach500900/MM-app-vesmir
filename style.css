@@ -3,6 +3,7 @@ body {
     font-family: Arial, sans-serif;
     background: #1a1a1a;
     color: white;
+    overflow: hidden;
 }
 
 header {
@@ -30,8 +31,14 @@ nav ul li a {
 #solar-system-container {
     cursor: grab;
     user-select: none;
+    width: 100vw;
+    height: 100vh;
 }
 
 #solar-system-container:active {
     cursor: grabbing;
+}
+
+canvas {
+    display: block;
 }

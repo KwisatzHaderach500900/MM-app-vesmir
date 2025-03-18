@@ -1,60 +1,71 @@
+//lock na planetu
+//zastavení/spusteni cele rotace - tlacitko freeze time
+//planety začínají na pozicich jako v reálu
+//Pozadí mlecne dráhy
+//pri najetí na planetu - text + v textu odkazy
+// zvuky vesmíru
+// video při najeti na planetu - animace - realná
+// přepínání realscale/teachingscale
+
 import * as THREE from 'three';
 
-let scene, camera, renderer;
+let scene, camera, renderer, sun;
 let solarSystemContainer;
+let currentCameraTarget;
+let planets = [];
 
-// Vytvořte globální loader pro textury
-const textureLoader = new THREE.TextureLoader();
-
+// Ovládací proměnné
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
-let cameraDistance = 300;
+let cameraRadius = 300;
 const minDistance = 50;
 const maxDistance = 1500;
 const cameraSpeed = 0.005;
-// Inicializujte kamera parametry
-let cameraTheta = 0; // horizontální úhel
-let cameraPhi = Math.PI / 2; // vertikální úhel (90° = shora)
-let cameraRadius = 300; // počáteční vzdálenost
-
-function updateCameraPosition() {
-    // Přepočítej pozici kamery ze sférických souřadnic
-    const x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
-    const y = cameraRadius * Math.cos(cameraPhi);
-    const z = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
-    
-    camera.position.set(x, y, z);
-    camera.lookAt(new THREE.Vector3(0, 0, 0)); // Střed = Slunce
-}
+let cameraTheta = 0;
+let cameraPhi = Math.PI / 2;
 
 class PlanetTrail {
     constructor(color) {
         this.points = [];
         this.trailLength = 500;
         this.geometry = new THREE.BufferGeometry();
-        this.material = new THREE.LineBasicMaterial({ color: color, linewidth: 1 });
+        this.material = new THREE.LineBasicMaterial({ color: color });
         this.line = new THREE.Line(this.geometry, this.material);
     }
 
     update(position) {
-        // Přidání nové pozice
         this.points.push(position.clone());
-        if (this.points.length > this.trailLength) {
-            this.points.shift();
-        }
-        
-        // Aktualizace geometrie
+        if (this.points.length > this.trailLength) this.points.shift();
         this.geometry.setFromPoints(this.points);
-        this.geometry.verticesNeedUpdate = true;
     }
+}
+
+function updateCameraPosition() {
+    const targetPos = currentCameraTarget.position;
+    const x = targetPos.x + cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+    const y = targetPos.y + cameraRadius * Math.cos(cameraPhi);
+    const z = targetPos.z + cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+    
+    camera.position.set(x, y, z);
+    camera.lookAt(targetPos);
+}
+
+function focusOnPlanet(planetMesh) {
+    currentCameraTarget = planetMesh;
+    cameraRadius = planetMesh.userData.radius * 10; //dynamicka velikost dle velikosti planety
+    
+    cameraTheta = 0;
+    cameraPhi = Math.PI / 2;
+    updateCameraPosition();
 }
 
 function initSolarSystem() {
     try {
-        const solarSystemContainer = document.getElementById("solar-system-container");
+        solarSystemContainer = document.getElementById("solar-system-container");
         
-        // Scéna
+        // Reset scény
         scene = new THREE.Scene();
+        const textureLoader = new THREE.TextureLoader();
 
         // Kamera
         camera = new THREE.PerspectiveCamera(
@@ -63,54 +74,58 @@ function initSolarSystem() {
             0.1,
             5000
         );
-        updateCameraPosition();
-        camera.lookAt(new THREE.Vector3(0,0,0));
 
-        // Ovládání myší
-        const onMouseDown = (event) => {
-            isDragging = true;
-            previousMousePosition = {
-                x: event.clientX,
-                y: event.clientY
-            };
-        };
+        // Slunce
+        sun = new THREE.Mesh(
+            new THREE.SphereGeometry(22, 32, 32),
+            new THREE.MeshPhongMaterial({
+                map: textureLoader.load('textures/2k_sun.jpg'),
+                emissive: 0xffffee,
+                emissiveIntensity: 0.5
+            })
+        );
+        scene.add(sun);
+        currentCameraTarget = sun;
+        scene.add(new THREE.AxesHelper(100)); // Zobrazí osy ve scéně
 
-        const onMouseUp = () => {
-            isDragging = false;
-        };
+        // Planety
+        const planetsConfig = [
+            { name: "Merkur", radius: 3.5, semiMajorAxis: 58, eccentricity: 0.2056, inclination: 7.0, speed: 0.0479, texture: 'textures/2k_mercury.jpg', color: 0x808080 },
+            { name: "Venuše", radius: 6.8, semiMajorAxis: 108, eccentricity: 0.0068, inclination: 3.39, speed: 0.0350, texture: 'textures/2k_venus_surface.jpg', color: 0xffd700 },
+            { name: "Země", radius: 7, semiMajorAxis: 150, eccentricity: 0.0167, inclination: 0.00005, speed: 0.01, texture: 'textures/2k_earth_daymap.jpg', color: 0x0000ff },
+            { name: "Mars", radius: 5.5, semiMajorAxis: 228, eccentricity: 0.0934, inclination: 1.85, speed: 0.008, texture: 'textures/2k_mars.jpg', color: 0xff0000 },
+            { name: "Jupiter", radius: 11, semiMajorAxis: 300, eccentricity: 0.0489, inclination: 1.304, speed: 0.005, texture: 'textures/2k_jupiter.jpg', color: 0xffa500 },
+            { name: "Saturn", radius: 10, semiMajorAxis: 500, eccentricity: 0.0565, inclination: 2.485, speed: 0.004, texture: 'textures/2k_saturn.jpg', color: 0xffd700 },
+            { name: "Uran", radius: 9, semiMajorAxis: 700, eccentricity: 0.0463, inclination: 0.772, speed: 0.003, texture: 'textures/2k_uranus.jpg', color: 0x00ffff },
+            { name: "Neptun", radius: 8.5, semiMajorAxis: 900, eccentricity: 0.0095, inclination: 1.769, speed: 0.002, texture: 'textures/2k_neptune.jpg', color: 0x0000cd }
+        ];
 
-        const onMouseMove = (event) => {
-            if (!isDragging) return;
-
-            const delta = {
-                x: event.clientX - previousMousePosition.x,
-                y: event.clientY - previousMousePosition.y
-            };
-
-            // Rotace kamery
-            cameraTheta -= delta.x * cameraSpeed;
-            cameraPhi -= delta.y * cameraSpeed * 0.5;
+        planets = planetsConfig.map(config => {
+            const planet = new THREE.Mesh(
+                new THREE.SphereGeometry(config.radius, 32, 32),
+                new THREE.MeshPhongMaterial({
+                    map: textureLoader.load(config.texture),
+                    specular: 0x111111,
+                    shininess: 5
+                })
+            );
             
-            // Omezení vertikálního úhlu (0.1π až 0.9π)
-            cameraPhi = Math.max(0.1 * Math.PI, Math.min(0.9 * Math.PI, cameraPhi));
+            planet.userData = {
+                ...config,
+                inclination: config.inclination * Math.PI/180,
+                trail: new PlanetTrail(config.color)
+            };
             
-            updateCameraPosition();
-            previousMousePosition = { x: event.clientX, y: event.clientY };
-        };
+            scene.add(planet.userData.trail.line);
+            scene.add(planet);
+            return planet;
+        });
 
-        const onWheel = (event) => {
-            // Zoom kolečkem myši
-            cameraRadius += event.deltaY * -0.1;
-            cameraRadius = Math.min(maxDistance, Math.max(minDistance, cameraRadius));
-            updateCameraPosition();
-        };
-
-        solarSystemContainer.addEventListener('mousedown', onMouseDown);
-        solarSystemContainer.addEventListener('mouseup', onMouseUp);
-        solarSystemContainer.addEventListener('mouseleave', onMouseUp);
-        solarSystemContainer.addEventListener('mousemove', onMouseMove);
-        solarSystemContainer.addEventListener('wheel', onWheel);
-        solarSystemContainer.addEventListener('contextmenu', (e) => e.preventDefault());
+        // Osvětlení
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
 
         // Renderer
         renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -118,172 +133,88 @@ function initSolarSystem() {
         renderer.setClearColor(0x000000);
         solarSystemContainer.appendChild(renderer.domElement);
 
-        // Osvětlení
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
+        // Ovládání myší
+        solarSystemContainer.addEventListener('click', (event) => {
+            const rect = solarSystemContainer.getBoundingClientRect();
+            const mouse = new THREE.Vector2(
+                ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                -((event.clientY - rect.top) / rect.height) * 2 + 1
+            );
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(5, 5, 5);
-        scene.add(directionalLight);
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
 
-        // Slunce
-        const sunTexture = textureLoader.load('textures/2k_sun.jpg');
-        const sunGeometry = new THREE.SphereGeometry(22, 32, 32);
-        const sunMaterial = new THREE.MeshPhongMaterial({
-            map: sunTexture,
-            emissive: 0xffffee,    // Světélkující efekt
-            emissiveIntensity: 0.01 // Intenzita "záře"
-        });
-        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-        scene.add(sun);
-
-        // Planety
-        const planets = [
-            {   name: "Merkur", 
-                radius: 3.5, 
-                semiMajorAxis: 58, 
-                eccentricity: 0.2056, 
-                inclination: 7.0 * Math.PI/180,
-                speed: 0.0479,
-                texture: 'textures/2k_mercury.jpg',
-                color: 0x999999
-            },
-            {   name: "Venuše", 
-                radius: 6.8, 
-                semiMajorAxis: 108, 
-                eccentricity: 0.0068, 
-                inclination: 3.39 * Math.PI/180,
-                speed: 0.0350,
-                texture: 'textures/2k_venus_surface.jpg',
-                color: 0x999999
-            },
-            {   name: "Země", 
-                radius: 7, 
-                semiMajorAxis: 150,
-                eccentricity: 0.0167,
-                inclination: 0.00005 * Math.PI/180,      
-                speed: 0.01, 
-                texture: 'textures/2k_earth_daymap.jpg',
-                color: 0x999999
-            },
-            {   name: "Mars", 
-                radius: 5.5, 
-                semiMajorAxis: 228,
-                eccentricity: 0.0934,
-                inclination: 1.85 * Math.PI/180, 
-                speed: 0.008, 
-                texture: 'textures/2k_mars.jpg',
-                color: 0x999999
-            },
-            {   name: "Jupiter", 
-                radius: 11, 
-                semiMajorAxis: 300,
-                eccentricity: 0.0489,
-                inclination: 1.304 * Math.PI/180, 
-                speed: 0.005, 
-                texture: 'textures/2k_jupiter.jpg',
-                color: 0x999999
-            },
-            {   name: "Saturn", 
-                radius: 10, 
-                semiMajorAxis: 500,
-                eccentricity: 0.0565,
-                inclination: 2.485 * Math.PI/180,  
-                speed: 0.004, 
-                texture: 'textures/2k_saturn.jpg',
-                color: 0x999999
-            },
-            {   name: "Uran", 
-                radius: 9, 
-                semiMajorAxis: 700,
-                eccentricity: 0.0463,
-                inclination: 0.772 * Math.PI/180, 
-                speed: 0.003, 
-                texture: 'textures/2k_uranus.jpg',
-                color: 0x999999
-            },
-            {   name: "Neptun", 
-                radius: 8.5, 
-                semiMajorAxis: 900,
-                eccentricity: 0.0095,
-                inclination: 1.769 * Math.PI/180, 
-                speed: 0.002,
-                texture: 'textures/2k_neptune.jpg',
-                color: 0x999999
+            const intersects = raycaster.intersectObjects(planets, true);
+            if (intersects.length > 0) {
+                focusOnPlanet(intersects[0].object);
+                console.log("Zamereno na: ", intersects[0].object.userData.name)
             }
-        ];
-
-        planets.forEach(planet => {
-            // Načtení textury pro všechny planety
-            const texture = textureLoader.load(planet.texture);
-            
-            // Vytvoření materiálu s texturou
-            const material = new THREE.MeshPhongMaterial({ 
-                map: texture,
-                specular: 0x111111,
-                shininess: 5
-            });
-        
-            // Vytvoření 3D objektu
-            const geometry = new THREE.SphereGeometry(planet.radius, 32, 32);
-            const mesh = new THREE.Mesh(geometry, material);
-            
-            // Pozicování a uložení dat
-            mesh.position.x = planet.distance;
-            mesh.userData = planet;
-            scene.add(mesh);
-
-            // Inicializace stopy
-            mesh.userData.trail = new PlanetTrail(planet.color);
-            scene.add(mesh.userData.trail.line);
-            scene.add(mesh);
+                
         });
+
+        const onMouseDown = (event) => {
+            isDragging = true;
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        };
+
+        const onMouseMove = (event) => {
+            if (!isDragging) return;
+            const delta = {
+                x: event.clientX - previousMousePosition.x,
+                y: event.clientY - previousMousePosition.y
+            };
+
+            cameraTheta += delta.x * cameraSpeed;
+            cameraPhi -= delta.y * cameraSpeed * 0.5;
+            cameraPhi = Math.max(0.1 * Math.PI, Math.min(0.9 * Math.PI, cameraPhi));
+            
+            updateCameraPosition();
+            previousMousePosition = { x: event.clientX, y: event.clientY };
+        };
+
+        const onWheel = (event) => {
+            cameraRadius = Math.min(maxDistance, Math.max(minDistance, cameraRadius + event.deltaY * -0.1));
+            updateCameraPosition();
+        };
+
+        solarSystemContainer.addEventListener('mousedown', onMouseDown);
+        solarSystemContainer.addEventListener('mouseup', () => isDragging = false);
+        solarSystemContainer.addEventListener('mouseleave', () => isDragging = false);
+        solarSystemContainer.addEventListener('mousemove', onMouseMove);
+        solarSystemContainer.addEventListener('wheel', onWheel);
+        solarSystemContainer.addEventListener('contextmenu', (e) => e.preventDefault());
 
         // Animace
-        let time = 0;
         function animate() {
             requestAnimationFrame(animate);
-            const time = Date.now() * 0.05;
+            const time = Date.now() * 0.001;
 
-            sun.rotation.y -= 0.005;
+            // Rotace Slunce
+            sun.rotation.y += 0.001;
 
-            scene.children.forEach(child => {
-                if (child !== sun && child instanceof THREE.Mesh) {
-                    const planetData = child.userData;
-
-                    // Výpočet eliptické dráhy
-                    const angle = time * planetData.speed;
-                    const r = planetData.semiMajorAxis * (1 - planetData.eccentricity**2) / 
-                            (1 + planetData.eccentricity * Math.cos(angle));
-                    
-                    // Základní pozice v orbitální rovině
-                    const x = r * Math.cos(angle);
-                    const z = r * Math.sin(angle);
-                    
-                    // Aplikace náklonu dráhy
-                    const y = Math.sin(angle) * Math.sin(planetData.inclination) * r;
-                    
-                    // Rotace pozice podle sklonu
-                    child.position.set(x, y, z);
-                    child.rotation.y += 0.01;
-
-                    // Aktualizace stopy
-                    planetData.trail.update(child.position);
+            // Pohyb planet
+            planets.forEach(planet => {
+                const data = planet.userData;
+                const angle = time * data.speed;
+                const r = data.semiMajorAxis * (1 - data.eccentricity**2) / (1 + data.eccentricity * Math.cos(angle));
+                
+                planet.position.set(
+                    r * Math.cos(angle),
+                    Math.sin(angle) * Math.sin(data.inclination) * r,
+                    r * Math.sin(angle)
+                );
+                if (currentCameraTarget===planet){
+                    updateCameraPosition();
                 }
+                planet.rotation.y += 0.01;
+                data.trail.update(planet.position);
             });
-
-            camera.lookAt(sun.position);
+            updateCameraPosition();
             renderer.render(scene, camera);
         }
 
-        // Responzivita
-        window.addEventListener('resize', () => {
-            camera.aspect = solarSystemContainer.clientWidth / solarSystemContainer.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(solarSystemContainer.clientWidth, solarSystemContainer.clientHeight);
-        });
-
         animate();
+        updateCameraPosition();
 
     } catch (error) {
         console.error("Chyba:", error);
@@ -291,11 +222,9 @@ function initSolarSystem() {
     }
 }
 
-// Spuštění po kliknutí
+// Spuštění
 document.getElementById("solar-system-link").addEventListener("click", (e) => {
     e.preventDefault();
     const container = document.getElementById("solar-system-container");
-    if (container && !container.querySelector('canvas')) {
-        initSolarSystem();
-    }
+    if (container && !container.querySelector('canvas')) initSolarSystem();
 });
