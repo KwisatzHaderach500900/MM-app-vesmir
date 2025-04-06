@@ -1,9 +1,3 @@
-//planety začínají na pozicich jako v reálu
-//pri najetí na planetu - text + v textu odkazy
-// zvuky vesmíru
-// video při najeti na planetu - animace - realná
-// přepínání realscale/teachingscale
-
 import * as THREE from 'three';
 
 let scene, camera, renderer, sun;
@@ -25,7 +19,7 @@ const maxDistance = 1500;
 const cameraSpeed = 0.005;
 let cameraTheta = 0;
 let cameraPhi = Math.PI / 2;
-const lerpFactor = 0.1; // Koeficient pro plynulý pohyb
+const lerpFactor = 0.1;
 
 class PlanetTrail {
     constructor(color) {
@@ -50,7 +44,6 @@ function updateCameraPosition(targetPosition) {
         targetPosition.z + cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta)
     );
     
-    // Lineární interpolace pro plynulý pohyb
     camera.position.lerp(desiredPosition, lerpFactor);
     camera.lookAt(targetPosition);
 }
@@ -62,20 +55,32 @@ function focusOnPlanet(planetMesh) {
     cameraPhi = Math.PI / 2;
 }
 
+function getPlanetPosition(config, time) {
+    const angle = time * config.speed;
+    const r = config.semiMajorAxis * (1 - config.eccentricity**2) / (1 + config.eccentricity * Math.cos(angle));
+
+    return new THREE.Vector3(
+        r * Math.cos(angle),
+        Math.sin(angle) * Math.sin(config.inclination * Math.PI/180) * r,
+        r * Math.sin(angle)
+    );
+}
+
 function initSolarSystem() {
     try {
         solarSystemContainer = document.getElementById("solar-system-container");
-        
+
         // Reset scény
         scene = new THREE.Scene();
         const textureLoader = new THREE.TextureLoader();
 
-        // pozadi
+        // Pozadí
         const backgroundGeometry = new THREE.SphereGeometry(3000, 64, 64);
         const backgroundMaterial = new THREE.MeshBasicMaterial({
             map: textureLoader.load('textures/2k_stars_milky_way.jpg'),
             side: THREE.BackSide,
             depthWrite: false,
+            depthTest: true,
             transparent: true,
             opacity: 1
         });
@@ -88,7 +93,7 @@ function initSolarSystem() {
             75,
             solarSystemContainer.clientWidth / solarSystemContainer.clientHeight,
             0.1,
-            5000
+            100000
         );
 
         // Slunce
@@ -115,6 +120,8 @@ function initSolarSystem() {
             { name: "Neptun", radius: 8.5, semiMajorAxis: 900, eccentricity: 0.0095, inclination: 1.769, speed: 0.002, texture: 'textures/2k_neptune.jpg', color: 0x0000cd }
         ];
 
+        // Vytvoření planet s reálnými počátečními pozicemi
+        const now = Date.now() / 1000;
         planets = planetsConfig.map(config => {
             const planet = new THREE.Mesh(
                 new THREE.SphereGeometry(config.radius, 32, 32),
@@ -124,13 +131,17 @@ function initSolarSystem() {
                     shininess: 5
                 })
             );
-            
+
+            const position = getPlanetPosition(config, now);
+            planet.position.copy(position);
+
             planet.userData = {
                 ...config,
                 inclination: config.inclination * Math.PI/180,
-                trail: new PlanetTrail(config.color)
+                trail: new PlanetTrail(config.color),
+                initialTime: now
             };
-            
+
             scene.add(planet.userData.trail.line);
             scene.add(planet);
             return planet;
@@ -143,32 +154,17 @@ function initSolarSystem() {
         scene.add(directionalLight);
 
         // Renderer
-        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            logarithmicDepthBuffer: true
+        });
         renderer.setSize(solarSystemContainer.clientWidth, solarSystemContainer.clientHeight);
         renderer.setClearColor(0x000000);
+        renderer.sortObjects = false;
         solarSystemContainer.appendChild(renderer.domElement);
 
-        // Ovládání myší
-        solarSystemContainer.addEventListener('click', (event) => {
-            const rect = solarSystemContainer.getBoundingClientRect();
-            const mouse = new THREE.Vector2(
-                ((event.clientX - rect.left) / rect.width) * 2 - 1,
-                -((event.clientY - rect.top) / rect.height) * 2 + 1
-            );
-
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(mouse, camera);
-
-            const clickableObjects = [sun, ...planets];
-            const intersects = raycaster.intersectObjects(clickableObjects, false);
-            
-            if (intersects.length > 0) {
-                const clickedObject = intersects[0].object;
-                focusOnPlanet(clickedObject);
-                if (clickedObject === sun) cameraRadius = 300;
-            }
-        });
-
+        // Ovládání myší - rotace pohledu
         const onMouseDown = (event) => {
             isDragging = true;
             previousMousePosition = { x: event.clientX, y: event.clientY };
@@ -184,8 +180,12 @@ function initSolarSystem() {
             cameraTheta += delta.x * cameraSpeed;
             cameraPhi -= delta.y * cameraSpeed * 0.5;
             cameraPhi = Math.max(0.1 * Math.PI, Math.min(0.9 * Math.PI, cameraPhi));
-            
+
             previousMousePosition = { x: event.clientX, y: event.clientY };
+        };
+
+        const onMouseUp = () => {
+            isDragging = false;
         };
 
         const onWheel = (event) => {
@@ -193,16 +193,58 @@ function initSolarSystem() {
         };
 
         solarSystemContainer.addEventListener('mousedown', onMouseDown);
-        solarSystemContainer.addEventListener('mouseup', () => isDragging = false);
-        solarSystemContainer.addEventListener('mouseleave', () => isDragging = false);
+        solarSystemContainer.addEventListener('mouseup', onMouseUp);
+        solarSystemContainer.addEventListener('mouseleave', onMouseUp);
         solarSystemContainer.addEventListener('mousemove', onMouseMove);
         solarSystemContainer.addEventListener('wheel', onWheel);
         solarSystemContainer.addEventListener('contextmenu', (e) => e.preventDefault());
 
-        
+        // Klikání na planety
+        solarSystemContainer.addEventListener('click', (event) => {
+            if (isDragging) return; // Zabrání kliknutí při tažení
+
+            const rect = solarSystemContainer.getBoundingClientRect();
+            const mouse = new THREE.Vector2(
+                ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                -((event.clientY - rect.top) / rect.height) * 2 + 1
+            );
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+
+            const clickableObjects = [sun, ...planets];
+            const intersects = raycaster.intersectObjects(clickableObjects, false);
+
+            if (intersects.length > 0) {
+                const clickedObject = intersects[0].object;
+                focusOnPlanet(clickedObject);
+                if (clickedObject === sun) cameraRadius = 300;
+            }
+        });
+
+        // Ovládací tlačítka
+        document.getElementById('speed-up').addEventListener('click', () => {
+            speedFactor = Math.min(8, speedFactor * 2);
+        });
+
+        document.getElementById('slow-down').addEventListener('click', () => {
+            speedFactor = Math.max(0.125, speedFactor * 0.5);
+        });
+
+        document.getElementById('stop').addEventListener('click', () => {
+            isAnimating = false;
+        });
+
+        document.getElementById('start').addEventListener('click', () => {
+            if (!isAnimating) {
+                isAnimating = true;
+                lastTime = performance.now();
+                requestAnimationFrame(animate);
+            }
+        });
 
         requestAnimationFrame((timestamp) => {
-            lastTime = timestamp; // Inicializace časové základny
+            lastTime = timestamp;
             animate(timestamp);
         });
 
@@ -210,33 +252,14 @@ function initSolarSystem() {
         console.error("Chyba:", error);
         alert("Aplikaci nelze spustit: " + error.message);
     }
-        //tlacitka ovladani rychlosti rotaci
-    document.getElementById('speed-up').addEventListener('click', () => {
-        speedFactor = Math.min(8, speedFactor * 2);
-    });
-
-    document.getElementById('slow-down').addEventListener('click', () => {
-        speedFactor = Math.max(0.125, speedFactor * 0.5);
-    });
-
-    document.getElementById('stop').addEventListener('click', () => {
-        isAnimating = false;
-    });
-
-    document.getElementById('start').addEventListener('click', () => {
-        if (!isAnimating) {
-            isAnimating = true;
-            lastTime = performance.now();
-            requestAnimationFrame(animate);
-        }
-    });
 }
 
 // Animace
 function animate(timestamp) {
     requestAnimationFrame(animate);
+
     if (!isAnimating) return;
-    //první iterace času
+
     if (lastTime === 0) lastTime = timestamp;
     //Vypocet deltaTime
     const deltaTime = (timestamp - lastTime) * 0.001;
@@ -244,33 +267,24 @@ function animate(timestamp) {
 
     //aktualizace simulovaneho casu
     simulatedTime += deltaTime * speedFactor;
-    
+
     // Rotace Slunce
     sun.rotation.y += 0.001 * speedFactor;
 
     // Pohyb planet
     planets.forEach(planet => {
         const data = planet.userData;
-        const angle = simulatedTime * data.speed;
-        const r = data.semiMajorAxis * (1 - data.eccentricity**2) / (1 + data.eccentricity * Math.cos(angle));
-        
-        if (isNaN(r)) {
-            console.error("NaN hodnota u planety:", data.name);
-            return;
-        }
+        const time = data.initialTime + simulatedTime;
+        const position = getPlanetPosition(data, time);
+        planet.position.copy(position);
 
-        planet.position.set(
-            r * Math.cos(angle),
-            Math.sin(angle) * Math.sin(data.inclination) * r,
-            r * Math.sin(angle)
-        );
         planet.rotation.y += 0.01 * speedFactor;
         data.trail.update(planet.position);
         planet.geometry.computeBoundingSphere();
-        planet.geometry.boundingSphere.radius *= 2;
+        planet.geometry.boundingSphere.radius *= 3;
+        planet.updateMatrixWorld(true);
     });
 
-    // Aktualizace kamery
     updateCameraPosition(currentCameraTarget.position);
     renderer.render(scene, camera);
 }
