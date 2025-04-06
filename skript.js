@@ -127,17 +127,19 @@ function initSolarSystem() {
             );
 
             const hitbox = new THREE.Mesh(
-                new THREE.SphereGeometry(config.radius * 2.5, 8, 8),
+                new THREE.SphereGeometry(config.radius * 3.5, 32, 32),
                 new THREE.MeshBasicMaterial({ visible: true, color: 0xff00ff, wireframe: true})
             );
-
+            hitbox.geometry.computeBoundingSphere();
             hitbox.raycast = THREE.Mesh.prototype.raycast;
             hitbox.userData = { planetMesh: planet, name: config.name };
             hitboxes.push(hitbox);
-            planet.add(hitbox);
+            //planet.add(hitbox);
 
             const position = getPlanetPosition(config, now);
             planet.position.copy(position);
+            planet.geometry.computeBoundingSphere();
+            planet.geometry.boundingSphere.radius *= 6;
 
             planet.userData = {
                 ...config,
@@ -203,7 +205,8 @@ function initSolarSystem() {
         solarSystemContainer.addEventListener('click', (event) => {
             if (isDragging) return;
 
-            const rect = solarSystemContainer.getBoundingClientRect();
+            const canvas = renderer.domElement;
+            const rect = canvas.getBoundingClientRect();
             const mouse = new THREE.Vector2(
                 ((event.clientX - rect.left) / rect.width) * 2 - 1,
                 -((event.clientY - rect.top) / rect.height) * 2 + 1
@@ -211,9 +214,10 @@ function initSolarSystem() {
 
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, camera);
+            drawRaycasterRay(raycaster);
             console.log("Mouse position:", mouse);
             scene.updateMatrixWorld(true);
-            const intersects = raycaster.intersectObjects(hitboxes, true);
+            const intersects = raycaster.intersectObjects(planets, true);
             console.log("Intersections found:", intersects);
 
             if (intersects.length > 0) {
@@ -288,3 +292,19 @@ document.getElementById("solar-system-link").addEventListener("click", (e) => {
     const container = document.getElementById("solar-system-container");
     if (container && !container.querySelector('canvas')) initSolarSystem();
 });
+function drawRaycasterRay(raycaster) {
+    const origin = raycaster.ray.origin;
+    const direction = raycaster.ray.direction.clone().normalize().multiplyScalar(10000);
+
+    const arrowHelper = new THREE.ArrowHelper(
+        direction.clone().normalize(),
+        origin,
+        direction.length(),
+        0xff0000
+    );
+
+    const oldArrow = scene.getObjectByName('rayHelper');
+    if (oldArrow) scene.remove(oldArrow);
+    arrowHelper.name = 'rayHelper';
+    scene.add(arrowHelper);
+}
