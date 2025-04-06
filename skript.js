@@ -18,7 +18,10 @@ const maxDistance = 1500;
 const cameraSpeed = 0.005;
 let cameraTheta = 0;
 let cameraPhi = Math.PI / 2;
-const lerpFactor = 0.1;
+const lerpFactor = 0.05;
+let currentCameraPosition = new THREE.Vector3();
+let popupTarget = null;
+let hoveredObject = null;
 
 class PlanetTrail {
     constructor(color) {
@@ -49,9 +52,18 @@ function updateCameraPosition(targetPosition) {
 
 function focusOnPlanet(planetMesh) {
     currentCameraTarget = planetMesh;
-    cameraRadius = planetMesh.userData.radius * 15;
-    cameraTheta = 0;
-    cameraPhi = Math.PI / 2;
+    currentCameraPosition.copy(camera.position);
+
+    if (planetMesh === sun) {
+        cameraRadius = 300;
+        //cameraTheta = Math.PI / 4;
+        //cameraPhi = Math.PI / 2.5;
+    } else {
+        cameraRadius = planetMesh.userData.radius * 15;
+        //cameraTheta = 0;
+        //cameraPhi = Math.PI / 2;
+    }
+    cameraRadius = Math.max(minDistance + 10, cameraRadius);
     updateCameraPosition(planetMesh.position);
 }
 
@@ -214,10 +226,11 @@ function initSolarSystem() {
 
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, camera);
-            drawRaycasterRay(raycaster);
+            //drawRaycasterRay(raycaster);
             console.log("Mouse position:", mouse);
             scene.updateMatrixWorld(true);
-            const intersects = raycaster.intersectObjects(planets, true);
+            const clickableObjects = [sun, ...planets];
+            const intersects = raycaster.intersectObjects(clickableObjects, true);
             console.log("Intersections found:", intersects);
 
             if (intersects.length > 0) {
@@ -225,6 +238,7 @@ function initSolarSystem() {
                 const targetPlanet = clickedObject.userData?.planetMesh || clickedObject;
                 console.log("Clicked on:", clickedObject.userData?.name || "Sun");
                 focusOnPlanet(targetPlanet);
+                showPopupOnObject(targetPlanet);
                 if (targetPlanet === sun) {
                     cameraRadius = 300;
                 }
@@ -285,6 +299,19 @@ function animate(timestamp) {
 
     updateCameraPosition(currentCameraTarget.position);
     renderer.render(scene, camera);
+
+    if (popupTarget) {
+        const vector = popupTarget.position.clone();
+        vector.project(camera); // převede na -1 až 1
+
+        const canvas = renderer.domElement;
+        const x = (vector.x * 0.5 + 0.5) * canvas.clientWidth;
+        const y = (-vector.y * 0.5 + 0.5) * canvas.clientHeight;
+
+        const popup = document.getElementById("popup-info");
+        popup.style.left = `${x}px`;
+        popup.style.top = `${y}px`;
+    }
 }
 
 document.getElementById("solar-system-link").addEventListener("click", (e) => {
@@ -307,4 +334,13 @@ function drawRaycasterRay(raycaster) {
     if (oldArrow) scene.remove(oldArrow);
     arrowHelper.name = 'rayHelper';
     scene.add(arrowHelper);
+}
+
+function showPopupOnObject(object) {
+    const popup = document.getElementById("popup-info");
+    const name = object.userData?.name || "Neznámý objekt";
+
+    popup.innerText = `🪐 ${name}`;
+    popup.style.display = "block";
+    popupTarget = object;
 }
