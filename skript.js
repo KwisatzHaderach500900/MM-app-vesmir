@@ -5,6 +5,7 @@ let solarSystemContainer;
 let currentCameraTarget;
 let background;
 let planets = [];
+let hitboxes = [];
 let speedFactor = 1;
 let lastTime = 0;
 let simulatedTime = 0;
@@ -41,7 +42,7 @@ function updateCameraPosition(targetPosition) {
         targetPosition.y + cameraRadius * Math.cos(cameraPhi),
         targetPosition.z + cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta)
     );
-    
+
     camera.position.lerp(desiredPosition, lerpFactor);
     camera.lookAt(targetPosition);
 }
@@ -56,11 +57,11 @@ function focusOnPlanet(planetMesh) {
 
 function getPlanetPosition(config, time) {
     const angle = time * config.speed;
-    const r = config.semiMajorAxis * (1 - config.eccentricity**2) / (1 + config.eccentricity * Math.cos(angle));
+    const r = config.semiMajorAxis * (1 - config.eccentricity ** 2) / (1 + config.eccentricity * Math.cos(angle));
 
     return new THREE.Vector3(
         r * Math.cos(angle),
-        Math.sin(angle) * Math.sin(config.inclination * Math.PI/180) * r,
+        Math.sin(angle) * Math.sin(config.inclination * Math.PI / 180) * r,
         r * Math.sin(angle)
     );
 }
@@ -69,11 +70,9 @@ function initSolarSystem() {
     try {
         solarSystemContainer = document.getElementById("solar-system-container");
 
-        // Reset scény
         scene = new THREE.Scene();
         const textureLoader = new THREE.TextureLoader();
 
-        // Pozadí
         const backgroundGeometry = new THREE.SphereGeometry(3000, 64, 64);
         const backgroundMaterial = new THREE.MeshBasicMaterial({
             map: textureLoader.load('textures/2k_stars_milky_way.jpg'),
@@ -87,7 +86,6 @@ function initSolarSystem() {
         background.userData.isBackground = true;
         scene.add(background);
 
-        // Kamera
         camera = new THREE.PerspectiveCamera(
             75,
             solarSystemContainer.clientWidth / solarSystemContainer.clientHeight,
@@ -95,7 +93,6 @@ function initSolarSystem() {
             100000
         );
 
-        // Slunce
         sun = new THREE.Mesh(
             new THREE.SphereGeometry(22, 32, 32),
             new THREE.MeshPhongMaterial({
@@ -107,7 +104,6 @@ function initSolarSystem() {
         scene.add(sun);
         currentCameraTarget = sun;
 
-        // Planety
         const planetsConfig = [
             { name: "Merkur", radius: 3.5, semiMajorAxis: 58, eccentricity: 0.2056, inclination: 7.0, speed: 0.0479, texture: 'textures/2k_mercury.jpg', color: 0x808080 },
             { name: "Venuše", radius: 6.8, semiMajorAxis: 108, eccentricity: 0.0068, inclination: 3.39, speed: 0.0350, texture: 'textures/2k_venus_surface.jpg', color: 0xffd700 },
@@ -119,9 +115,8 @@ function initSolarSystem() {
             { name: "Neptun", radius: 8.5, semiMajorAxis: 900, eccentricity: 0.0095, inclination: 1.769, speed: 0.002, texture: 'textures/2k_neptune.jpg', color: 0x0000cd }
         ];
 
-        // Vytvoření planet s reálnými počátečními pozicemi
         const now = Date.now() / 1000;
-        planets = planetsConfig.map(config => {
+        planets = planetsConfig.map((config) => {
             const planet = new THREE.Mesh(
                 new THREE.SphereGeometry(config.radius, 32, 32),
                 new THREE.MeshPhongMaterial({
@@ -131,12 +126,22 @@ function initSolarSystem() {
                 })
             );
 
+            const hitbox = new THREE.Mesh(
+                new THREE.SphereGeometry(config.radius * 2.5, 8, 8),
+                new THREE.MeshBasicMaterial({ visible: true, color: 0xff00ff, wireframe: true})
+            );
+
+            hitbox.raycast = THREE.Mesh.prototype.raycast;
+            hitbox.userData = { planetMesh: planet, name: config.name };
+            hitboxes.push(hitbox);
+            planet.add(hitbox);
+
             const position = getPlanetPosition(config, now);
             planet.position.copy(position);
 
             planet.userData = {
                 ...config,
-                inclination: config.inclination * Math.PI/180,
+                inclination: config.inclination * Math.PI / 180,
                 trail: new PlanetTrail(config.color),
                 initialTime: now
             };
@@ -146,13 +151,11 @@ function initSolarSystem() {
             return planet;
         });
 
-        // Osvětlení
         scene.add(new THREE.AmbientLight(0xffffff, 0.5));
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
 
-        // Renderer
         renderer = new THREE.WebGLRenderer({
             antialias: true,
             alpha: true,
@@ -163,7 +166,6 @@ function initSolarSystem() {
         renderer.sortObjects = false;
         solarSystemContainer.appendChild(renderer.domElement);
 
-        // Ovládání myší - rotace pohledu
         const onMouseDown = (event) => {
             isDragging = true;
             previousMousePosition = { x: event.clientX, y: event.clientY };
@@ -198,12 +200,8 @@ function initSolarSystem() {
         solarSystemContainer.addEventListener('wheel', onWheel);
         solarSystemContainer.addEventListener('contextmenu', (e) => e.preventDefault());
 
-        // Klikání na planety
         solarSystemContainer.addEventListener('click', (event) => {
-            if (isDragging) {
-                isDragging = false;
-                return;
-            }
+            if (isDragging) return;
 
             const rect = solarSystemContainer.getBoundingClientRect();
             const mouse = new THREE.Vector2(
@@ -214,26 +212,23 @@ function initSolarSystem() {
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, camera);
             console.log("Mouse position:", mouse);
-
-            const clickableObjects = [sun, ...planets];
-            console.log("ClickableObject:", clickableObjects);
-            raycaster.params.Points.threshold = 15;
-            const intersects = raycaster.intersectObjects(clickableObjects, false);
+            scene.updateMatrixWorld(true);
+            const intersects = raycaster.intersectObjects(hitboxes, true);
             console.log("Intersections found:", intersects);
 
             if (intersects.length > 0) {
                 const clickedObject = intersects[0].object;
+                const targetPlanet = clickedObject.userData?.planetMesh || clickedObject;
                 console.log("Clicked on:", clickedObject.userData?.name || "Sun");
-                focusOnPlanet(clickedObject);
-                if (clickedObject === sun) {
+                focusOnPlanet(targetPlanet);
+                if (targetPlanet === sun) {
                     cameraRadius = 300;
                 }
-            }  else{
+            } else {
                 console.log("No object clicked");
             }
         });
 
-        // Ovládací tlačítka
         document.getElementById('speed-up').addEventListener('click', () => {
             speedFactor = Math.min(8, speedFactor * 2);
         });
@@ -262,7 +257,6 @@ function initSolarSystem() {
     }
 }
 
-// Animace
 function animate(timestamp) {
     requestAnimationFrame(animate);
 
@@ -270,35 +264,25 @@ function animate(timestamp) {
     const deltaTime = (timestamp - lastTime) * 0.001;
     lastTime = timestamp;
 
-if (!isRotationFrozen){
-    simulatedTime += deltaTime * speedFactor;
+    if (!isRotationFrozen) {
+        simulatedTime += deltaTime * speedFactor;
 
-    // Rotace Slunce
-    sun.rotation.y += 0.001 * speedFactor;
+        sun.rotation.y += 0.001 * speedFactor;
 
-    // Pohyb planet
-    planets.forEach(planet => {
-        const data = planet.userData;
-        const time = data.initialTime + simulatedTime;
-        const position = getPlanetPosition(data, time);
-        planet.position.copy(position);
+        planets.forEach(planet => {
+            const data = planet.userData;
+            const time = data.initialTime + simulatedTime;
+            const position = getPlanetPosition(data, time);
+            planet.position.copy(position);
+            planet.rotation.y += 0.01 * speedFactor;
+            data.trail.update(planet.position);
+        });
+    }
 
-        planet.rotation.y += 0.01 * speedFactor;
-        data.trail.update(planet.position);
-    });
+    updateCameraPosition(currentCameraTarget.position);
+    renderer.render(scene, camera);
 }
 
-planets.forEach(planet => {
-    planet.geometry.computeBoundingSphere();
-    planet.geometry.boundingSphere.radius *= 3;
-    planet.updateMatrixWorld(true);
-});
-
-updateCameraPosition(currentCameraTarget.position);
-renderer.render(scene, camera);
-}
-
-// Spuštění
 document.getElementById("solar-system-link").addEventListener("click", (e) => {
     e.preventDefault();
     const container = document.getElementById("solar-system-container");
