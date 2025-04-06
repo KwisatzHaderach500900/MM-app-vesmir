@@ -48,9 +48,10 @@ function updateCameraPosition(targetPosition) {
 
 function focusOnPlanet(planetMesh) {
     currentCameraTarget = planetMesh;
-    cameraRadius = planetMesh.userData.radius * 10;
+    cameraRadius = planetMesh.userData.radius * 15;
     cameraTheta = 0;
     cameraPhi = Math.PI / 2;
+    updateCameraPosition(planetMesh.position);
 }
 
 function getPlanetPosition(config, time) {
@@ -199,7 +200,10 @@ function initSolarSystem() {
 
         // Klikání na planety
         solarSystemContainer.addEventListener('click', (event) => {
-            if (isDragging) return; // Zabrání kliknutí při tažení
+            if (isDragging) {
+                isDragging = false;
+                return;
+            }
 
             const rect = solarSystemContainer.getBoundingClientRect();
             const mouse = new THREE.Vector2(
@@ -209,14 +213,23 @@ function initSolarSystem() {
 
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(mouse, camera);
+            console.log("Mouse position:", mouse);
 
             const clickableObjects = [sun, ...planets];
+            console.log("ClickableObject:", clickableObjects);
+            raycaster.params.Points.threshold = 15;
             const intersects = raycaster.intersectObjects(clickableObjects, false);
+            console.log("Intersections found:", intersects);
 
             if (intersects.length > 0) {
                 const clickedObject = intersects[0].object;
+                console.log("Clicked on:", clickedObject.userData?.name || "Sun");
                 focusOnPlanet(clickedObject);
-                if (clickedObject === sun) cameraRadius = 300;
+                if (clickedObject === sun) {
+                    cameraRadius = 300;
+                }
+            }  else{
+                console.log("No object clicked");
             }
         });
 
