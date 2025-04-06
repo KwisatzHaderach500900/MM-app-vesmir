@@ -8,9 +8,7 @@ let planets = [];
 let speedFactor = 1;
 let lastTime = 0;
 let simulatedTime = 0;
-let isAnimating = true;
-
-// Ovládací proměnné
+let isRotationFrozen = false;
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 let cameraRadius = 300;
@@ -232,15 +230,12 @@ function initSolarSystem() {
         });
 
         document.getElementById('stop').addEventListener('click', () => {
-            isAnimating = false;
+            isRotationFrozen = true;
         });
 
         document.getElementById('start').addEventListener('click', () => {
-            if (!isAnimating) {
-                isAnimating = true;
-                lastTime = performance.now();
-                requestAnimationFrame(animate);
-            }
+            isRotationFrozen = false;
+            if (lastTime === 0) lastTime = performance.now();
         });
 
         requestAnimationFrame((timestamp) => {
@@ -258,14 +253,11 @@ function initSolarSystem() {
 function animate(timestamp) {
     requestAnimationFrame(animate);
 
-    if (!isAnimating) return;
-
     if (lastTime === 0) lastTime = timestamp;
-    //Vypocet deltaTime
     const deltaTime = (timestamp - lastTime) * 0.001;
     lastTime = timestamp;
 
-    //aktualizace simulovaneho casu
+if (!isRotationFrozen){
     simulatedTime += deltaTime * speedFactor;
 
     // Rotace Slunce
@@ -280,13 +272,17 @@ function animate(timestamp) {
 
         planet.rotation.y += 0.01 * speedFactor;
         data.trail.update(planet.position);
-        planet.geometry.computeBoundingSphere();
-        planet.geometry.boundingSphere.radius *= 3;
-        planet.updateMatrixWorld(true);
     });
+}
 
-    updateCameraPosition(currentCameraTarget.position);
-    renderer.render(scene, camera);
+planets.forEach(planet => {
+    planet.geometry.computeBoundingSphere();
+    planet.geometry.boundingSphere.radius *= 3;
+    planet.updateMatrixWorld(true);
+});
+
+updateCameraPosition(currentCameraTarget.position);
+renderer.render(scene, camera);
 }
 
 // Spuštění
