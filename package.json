@@ -13,5 +13,8 @@
   "private": true,
   "dependencies": {
     "three": "^0.175.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.176.0"
   }
 }

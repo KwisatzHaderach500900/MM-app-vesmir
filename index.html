@@ -19,48 +19,28 @@
 <body>
     <header>
         <h1>3D Sluneční soustava</h1>
-        <nav>
-            <ul>
-                <li><a href="#solar-system" id="solar-system-link">Načíst model</a></li>
-            </ul>
-        </nav>
     </header>
     <div class="controls">
-        <button id="slow-down" title="Zpomalit">⏪</button>
-        <button id="speed-up" title="Zrychlit">⏩</button>
+        <button id="reload-page" title="Načíst znovu">🔃 Znovu načíst</button>
+        <button id="slow-down10" title="Zpomalit x10">10x ⏪</button>
+        <button id="slow-down" title="Zpomalit">1x ⏪</button>
         <button id="stop" title="Zastavit">⏸️</button>
         <button id="start" title="Spustit">▶️</button>
+        <button id="speed-up" title="Zrychlit">1x ⏩</button>
+        <button id="speed-up10" title="Zrychlit x10">10x ⏩</button>
+        <button id="reset-speed" title="Reset rychlosti">🔁</button>
+        <div id="speed-display">🔄 Rychlost: 1×</div>
+    </div>
+    <div id="object-list-wrapper">
+        <div id="object-list"></div>
     </div>
     <section id="solar-system">
         <div id="solar-system-container"></div>
     </section>
 
-    <div id="popup-info" style="
-    position: absolute;
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: sans-serif;
-    pointer-events: none;
-    display: none;
-    z-index: 9999;
-    max-width: 200px;
-"></div>
+    <div id="popup-info"></div>
 
-    <div id="hover-tooltip" style="
-    position: absolute;
-    padding: 4px 8px;
-    background: rgba(0, 0, 0, 0.75);
-    color: white;
-    border-radius: 4px;
-    font-size: 13px;
-    font-family: sans-serif;
-    pointer-events: none;
-    display: none;
-    z-index: 9999;
-"></div>
+    <div id="hover-tooltip"></div>
 
     <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
     <script type="importmap">
