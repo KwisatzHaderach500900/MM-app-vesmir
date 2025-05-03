@@ -87,7 +87,7 @@ function initSolarSystem() {
 
         const backgroundGeometry = new THREE.SphereGeometry(3000, 64, 64);
         const backgroundMaterial = new THREE.MeshBasicMaterial({
-            map: textureLoader.load('textures/2k_stars_milky_way.jpg'),
+            map: textureLoader.load('textures/1567215018748-ESA_Gaia_DR2_AllSky_Brightness_Colour_Cartesian_2000x1000.png'),
             side: THREE.BackSide,
             depthWrite: false,
             depthTest: true,
@@ -113,11 +113,19 @@ function initSolarSystem() {
                 emissiveIntensity: 0.5
             })
         );
+        sun.userData = { name: 'Slunce' };
         scene.add(sun);
         currentCameraTarget = sun;
 
         const planetsConfig = [
-            { name: "Merkur", radius: 3.5, semiMajorAxis: 58, eccentricity: 0.2056, inclination: 7.0, speed: 0.0479, texture: 'textures/2k_mercury.jpg', color: 0x808080 },
+            { name: "Merkur",
+                radius: 3.5,
+                semiMajorAxis: 58,
+                eccentricity: 0.2056,
+                inclination: 7.0,
+                speed: 0.0479,
+                texture: 'textures/2k_mercury.jpg',
+                color: 0x808080},
             { name: "Venuše", radius: 6.8, semiMajorAxis: 108, eccentricity: 0.0068, inclination: 3.39, speed: 0.0350, texture: 'textures/2k_venus_surface.jpg', color: 0xffd700 },
             { name: "Země", radius: 7, semiMajorAxis: 150, eccentricity: 0.0167, inclination: 0.00005, speed: 0.01, texture: 'textures/2k_earth_daymap.jpg', color: 0x0000ff },
             { name: "Mars", radius: 5.5, semiMajorAxis: 228, eccentricity: 0.0934, inclination: 1.85, speed: 0.008, texture: 'textures/2k_mars.jpg', color: 0xff0000 },
@@ -186,6 +194,24 @@ function initSolarSystem() {
         };
 
         const onMouseMove = (event) => {
+            const canvas = renderer.domElement;
+            const rect = canvas.getBoundingClientRect();
+            const mouse = new THREE.Vector2(
+                ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                -((event.clientY - rect.top) / rect.height) * 2 + 1
+            );
+            const raycasterHover = new THREE.Raycaster();
+            raycasterHover.setFromCamera(mouse, camera);
+            const intersects = raycasterHover.intersectObjects([sun, ...planets], true);
+            if (intersects.length > 0) {
+                hoveredObject = intersects[0].object;
+                document.getElementById('hover-tooltip').style.display = 'block';
+            } else {
+                hoveredObject = null;
+                document.getElementById('hover-tooltip').style.display = 'none';
+            }
+
+            // Ovládání kamery (otáčení)
             if (!isDragging) return;
             const delta = {
                 x: event.clientX - previousMousePosition.x,
@@ -244,6 +270,9 @@ function initSolarSystem() {
                 }
             } else {
                 console.log("No object clicked");
+                popupTarget = null;
+                const popup = document.getElementById('popup-info');
+                popup.style.display = 'none';
             }
         });
 
@@ -312,6 +341,20 @@ function animate(timestamp) {
         popup.style.left = `${x}px`;
         popup.style.top = `${y}px`;
     }
+
+    if (hoveredObject) {
+        const vector = hoveredObject.position.clone();
+        vector.project(camera);
+
+        const canvas = renderer.domElement;
+        const x = (vector.x * 0.5 + 0.5) * canvas.clientWidth;
+        const y = (-vector.y * 0.5 + 0.5) * canvas.clientHeight;
+
+        const tooltip = document.getElementById("hover-tooltip");
+        tooltip.innerText = hoveredObject.userData?.name || "Neznámý objekt";
+        tooltip.style.left = `${x - 80}px`;
+        tooltip.style.top = `${y - 40}px`;
+    }
 }
 
 document.getElementById("solar-system-link").addEventListener("click", (e) => {
@@ -319,7 +362,7 @@ document.getElementById("solar-system-link").addEventListener("click", (e) => {
     const container = document.getElementById("solar-system-container");
     if (container && !container.querySelector('canvas')) initSolarSystem();
 });
-function drawRaycasterRay(raycaster) {
+/*function drawRaycasterRay(raycaster) {
     const origin = raycaster.ray.origin;
     const direction = raycaster.ray.direction.clone().normalize().multiplyScalar(10000);
 
@@ -334,13 +377,13 @@ function drawRaycasterRay(raycaster) {
     if (oldArrow) scene.remove(oldArrow);
     arrowHelper.name = 'rayHelper';
     scene.add(arrowHelper);
-}
+}*/
 
 function showPopupOnObject(object) {
     const popup = document.getElementById("popup-info");
     const name = object.userData?.name || "Neznámý objekt";
 
-    popup.innerText = `🪐 ${name}`;
+    popup.innerText =`🪐 ${name}`;
     popup.style.display = "block";
     popupTarget = object;
 }
