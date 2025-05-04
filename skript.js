@@ -25,6 +25,8 @@ let hoveredObject = null;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let highlightHalo = null;
+let highlightEnabled = false;
+let highlightedObject = null;
 
 class PlanetTrail {
     constructor(color) {
@@ -40,6 +42,43 @@ class PlanetTrail {
         if (this.points.length > this.trailLength) this.points.shift();
         this.geometry.setFromPoints(this.points);
     }
+}
+function getOrbitColor(type) {
+    switch (type) {
+        case "planet": return 0x00aaff;
+        case "transneptunic": return 0xe11818;
+        case "comet": return 0xffaa00;
+        case "star": return 0xffff00;
+        default: return 0xffffff;
+    }
+}
+
+function createOrbitEllipse(config) {
+    const a = config.semiMajorAxis;
+    const e = config.eccentricity;
+    const inclination = config.inclination * Math.PI / 180;
+    const segments = 360;
+    const points = [];
+    for (let i = 0; i <= segments; i++) {
+        const angle = (i / segments) * 2 * Math.PI;
+        const r = a * (1 - e ** 2) / (1 + e * Math.cos(angle));
+
+        const x = r * Math.cos(angle);
+        const y = 0;
+        const z = r * Math.sin(angle);
+
+        points.push(new THREE.Vector3(x, y, z));
+    }
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+        color: getOrbitColor(config.type),
+        transparent: true,
+        opacity: 0.4
+    });
+    const ellipse = new THREE.LineLoop(geometry, material);
+    ellipse.position.x = -a * e;
+    ellipse.rotation.x = inclination;
+    return ellipse;
 }
 
 function updateCameraPosition(targetPosition) {
@@ -72,13 +111,17 @@ function focusOnPlanet(planetMesh) {
 
 function getPlanetPosition(config, time) {
     const angle = time * config.speed;
-    const r = config.semiMajorAxis * (1 - config.eccentricity ** 2) / (1 + config.eccentricity * Math.cos(angle));
-
-    return new THREE.Vector3(
-        r * Math.cos(angle),
-        Math.sin(angle) * Math.sin(config.inclination * Math.PI / 180) * r,
-        r * Math.sin(angle)
-    );
+    const a = config.semiMajorAxis;
+    const e = config.eccentricity;
+    const r = a * (1 - e ** 2) / (1 + e * Math.cos(angle));
+    const x = r * Math.cos(angle);
+    const z = r * Math.sin(angle);
+    const y = 0;
+    const position = new THREE.Vector3(x, y, z);
+    position.x -= a * e;
+    const inclination = config.inclination * Math.PI / 180;
+    position.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination);
+    return position;
 }
 
 function initSolarSystem() {
@@ -107,23 +150,52 @@ function initSolarSystem() {
             0.1,
             100000
         );
+        function createAsteroidBeltInstanced(count = 15000) {
+            const innerRadius = 250;
+            const outerRadius = 350;
+            const minZ = -10;
+            const maxZ = 10;
 
-        sun = new THREE.Mesh(
-            new THREE.SphereGeometry(22, 32, 32),
-            new THREE.MeshPhongMaterial({
-                map: textureLoader.load('textures/2k_sun.jpg'),
+            const geometry = new THREE.SphereGeometry(0.3, 6, 6);
+            const material = new THREE.MeshBasicMaterial({ color: 0x1E1E1E});
+
+            const mesh = new THREE.InstancedMesh(geometry, material, count);
+            const dummy = new THREE.Object3D();
+
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * 2 * Math.PI;
+                const radius = THREE.MathUtils.lerp(innerRadius, outerRadius, Math.random());
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;
+                const y = THREE.MathUtils.randFloat(minZ, maxZ);
+
+                dummy.position.set(x, y, z);
+                dummy.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                dummy.updateMatrix();
+                mesh.setMatrixAt(i, dummy.matrix);
+            }
+
+            scene.add(mesh);
+        }
+        const planetsConfig = [
+            {
+                name: "Slunce",
+                radius: 22,
+                semiMajorAxis: 0,
+                eccentricity: 0,
+                inclination: 0,
+                speed: 0,
+                texture: 'textures/2k_sun.jpg',
+                color: 0xffff00,
+                type: "star",
+                info: "Tak asi Slunce ne? Hvězda kámo, prostě jedinej a pravej bůh všech opic z planety Země.",
                 emissive: 0xffffee,
                 emissiveIntensity: 0.1
-            })
-        );
-        sun.userData = { name: 'Slunce',
-            type: "star",
-            info: "Tak asi Slunce ne? Hvězda kámo, prostě jedinej a pravej bůh všech opic z planety Země."
-        };
-        scene.add(sun);
-        currentCameraTarget = sun;
-
-        const planetsConfig = [
+            },
             { name: "Merkur",
                 radius: 3.5,
                 semiMajorAxis: 58,
@@ -165,11 +237,12 @@ function initSolarSystem() {
                 speed: 0.008,
                 texture: 'textures/2k_mars.jpg',
                 color: 0xff0000,
+                type: "planet",
                 info: "Čtvrtá planeta Sluneční soustavy. Vzdálenost od Slunce: 228 milionů km. Délka dne a noci: 24,6 hodiny. Povrchový tlak: ~0,6 kPa, teplota: −125 °C až +20 °C. Vychýlení oběžné dráhy: 0,093. Oběžná rychlost: 24,1 km/s."
             },
             { name: "Jupiter",
                 radius: 11,
-                semiMajorAxis: 300,
+                semiMajorAxis: 400,
                 eccentricity: 0.0489,
                 inclination: 1.304,
                 speed: 0.005,
@@ -197,6 +270,7 @@ function initSolarSystem() {
                 speed: 0.003,
                 texture: 'textures/2k_uranus.jpg',
                 color: 0x00ffff,
+                type: "planet",
                 info: "Sedmá planeta Sluneční soustavy. Vzdálenost od Slunce: 2,87 miliardy km. Délka dne a noci: 17,2 hodin. Povrchový tlak: nejasný, teplota: ~−224 °C. Vychýlení oběžné dráhy: 0,046. Oběžná rychlost: 6,8 km/s."
             },
             { name: "Neptun",
@@ -273,8 +347,8 @@ function initSolarSystem() {
             {
                 name: "Halleyova kometa",
                 radius: 2,
-                semiMajorAxis: 2600,
-                eccentricity: 0.967,
+                semiMajorAxis: 2500,
+                eccentricity: 0.85,
                 inclination: 162.26,
                 speed: 0.00075,
                 texture: 'textures/comet_halley.jpg',
@@ -285,8 +359,8 @@ function initSolarSystem() {
             {
                 name: "Hale-Boppova kometa",
                 radius: 3,
-                semiMajorAxis: 18600,
-                eccentricity: 0.9951,
+                semiMajorAxis: 2500,
+                eccentricity: 0.9,
                 inclination: 89.4,
                 speed: 0.00009,
                 texture: 'textures/comet_hale_bopp.jpg',
@@ -298,7 +372,7 @@ function initSolarSystem() {
                 name: "Enckeova kometa",
                 radius: 1.5,
                 semiMajorAxis: 388,
-                eccentricity: 0.85,
+                eccentricity: 0.75,
                 inclination: 11.8,
                 speed: 0.0045,
                 texture: 'textures/comet_encke.jpg',
@@ -310,7 +384,7 @@ function initSolarSystem() {
                 name: "Kohoutkova kometa",
                 radius: 2.5,
                 semiMajorAxis: 640,
-                eccentricity: 0.999,
+                eccentricity: 0.9,
                 inclination: 13.3,
                 speed: 0.00095,
                 texture: 'textures/comet_kohoutek.jpg',
@@ -322,13 +396,20 @@ function initSolarSystem() {
 
         const now = Date.now() / 1000;
         planets = planetsConfig.map((config) => {
+            const materialOptions = {
+                map: textureLoader.load(config.texture),
+                specular: 0x111111,
+                shininess: 5
+            };
+
+            if (config.emissive) {
+                materialOptions.emissive = new THREE.Color(config.emissive);
+                materialOptions.emissiveIntensity = config.emissiveIntensity || 0.2;
+            }
+
             const planet = new THREE.Mesh(
                 new THREE.SphereGeometry(config.radius, 32, 32),
-                new THREE.MeshPhongMaterial({
-                    map: textureLoader.load(config.texture),
-                    specular: 0x111111,
-                    shininess: 5
-                })
+                new THREE.MeshPhongMaterial(materialOptions)
             );
 
             const hitbox = new THREE.Mesh(
@@ -343,6 +424,12 @@ function initSolarSystem() {
 
             const position = getPlanetPosition(config, now);
             planet.position.copy(position);
+
+            if (config.semiMajorAxis > 0) {
+                const orbit = createOrbitEllipse(config);
+                scene.add(orbit);
+            }
+
             planet.geometry.computeBoundingSphere();
             planet.geometry.boundingSphere.radius *= 6;
 
@@ -357,6 +444,10 @@ function initSolarSystem() {
             scene.add(planet);
             return planet;
         });
+        createAsteroidBeltInstanced();
+        sun = planets.find(p => p.userData.type === "star");
+        currentCameraTarget = sun;
+
         createObjectList(planets);
         scene.add(new THREE.AmbientLight(0xffffff, 0.5));
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -386,7 +477,7 @@ function getMouseRaycaster(event) {
 }
         const onMouseMove = (event) => {
             getMouseRaycaster(event);
-            const intersects = raycaster.intersectObjects([sun, ...planets], true);
+            const intersects = raycaster.intersectObjects(planets, true);
             if (intersects.length > 0) {
                 hoveredObject = intersects[0].object;
                 document.getElementById('hover-tooltip').style.display = 'block';
@@ -428,23 +519,23 @@ function getMouseRaycaster(event) {
             if (isDragging) return;
             getMouseRaycaster(event);
             //drawRaycasterRay(raycaster);
-            console.log("Mouse position:", mouse);
+            //console.log("Mouse position:", mouse);
             scene.updateMatrixWorld(true);
             const clickableObjects = [sun, ...planets];
             const intersects = raycaster.intersectObjects(clickableObjects, true);
-            console.log("Intersections found:", intersects);
+            //console.log("Intersections found:", intersects);
 
             if (intersects.length > 0) {
                 const clickedObject = intersects[0].object;
                 const targetPlanet = clickedObject.userData?.planetMesh || clickedObject;
-                console.log("Clicked on:", clickedObject.userData?.name || "Sun");
+                //console.log("Clicked on:", clickedObject.userData?.name || "Sun");
                 focusOnPlanet(targetPlanet);
                 showPopupOnObject(targetPlanet);
-                if (targetPlanet === sun) {
+                if (targetPlanet.userData?.type === 'star') {
                     cameraRadius = 300;
                 }
             } else {
-                console.log("No object clicked");
+                //console.log("No object clicked");
                 popupTarget = null;
                 const popup = document.getElementById('popup-info');
                 popup.style.display = 'none';
@@ -531,6 +622,7 @@ function animate(timestamp) {
             const position = getPlanetPosition(data, time);
             planet.position.copy(position);
             planet.rotation.y += 0.01 * speedFactor;
+            //deaktivace/aktivace trailů všech planet
             data.trail.update(planet.position);
         });
     }
@@ -552,11 +644,16 @@ function animate(timestamp) {
         tooltip.style.left = `${x - 80}px`;
         tooltip.style.top = `${y - 40}px`;
     }
-    if (highlightHalo && popupTarget) {
-        highlightHalo.position.copy(popupTarget.position);
+    if (highlightHalo && highlightedObject) {
+        highlightHalo.position.copy(highlightedObject.position);
+
+        const pulseSpeed = 6;
+        const scaleFactor = 1 + 0.6 * Math.sin(performance.now() * 0.001 * pulseSpeed);
+        highlightHalo.scale.set(scaleFactor, scaleFactor, scaleFactor);
     }
 }
 initSolarSystem();
+
 /*function drawRaycasterRay(raycaster) {
     const origin = raycaster.ray.origin;
     const direction = raycaster.ray.direction.clone().normalize().multiplyScalar(10000);
@@ -601,14 +698,6 @@ function createObjectList(objects) {
     const transneptunicList = document.getElementById('transneptunic-list');
     const cometList = document.getElementById('comet-list');
 
-    const sunItem = document.createElement('li');
-    sunItem.textContent = sun.userData.name || "Slunce";
-    sunItem.addEventListener('click', () => {
-        focusOnPlanet(sun);
-        showPopupOnObject(sun);
-    });
-    starList.appendChild(sunItem);
-
     objects.forEach(obj => {
         const item = document.createElement('li');
         item.textContent = obj.userData.name;
@@ -646,45 +735,38 @@ function createObjectList(objects) {
             list.style.display = visible ? 'none' : 'block';
         });
     });
+    document.getElementById('star-list').style.display = 'none';
     document.getElementById('planet-list').style.display = 'none';
     document.getElementById('transneptunic-list').style.display = 'none';
     document.getElementById('comet-list').style.display = 'none';
 }
 
 function setHighlightHalo(object, show = true) {
-    if (!object || object === sun) return;
+    if (!highlightEnabled || !object || object.userData.type === "star") return;
 
     if (show) {
         if (highlightHalo) scene.remove(highlightHalo);
 
         const geometry = new THREE.SphereGeometry(object.geometry.parameters.radius * 6, 32, 32);
         const material = new THREE.MeshBasicMaterial({
-            color: 0x00ffff,
+            color: 0xFF1493,
             transparent: true,
             opacity: 0.7,
             depthWrite: false,
         });
 
         highlightHalo = new THREE.Mesh(geometry, material);
-        highlightHalo.position.copy(object.position);
         scene.add(highlightHalo);
+
+        highlightedObject = object;
     } else {
         if (highlightHalo) {
             scene.remove(highlightHalo);
             highlightHalo = null;
         }
+        highlightedObject = null;
     }
 }
-
-document.getElementById('toggle-object-list').addEventListener('click', () => {
-    const list = document.getElementById('object-list');
-    const button = document.getElementById('toggle-object-list');
-    const visible = list.style.display !== 'none';
-
-    list.style.display = visible ? 'none' : 'block';
-    button.textContent = visible ? '🪐 Zobrazit planety' : '🪐 Skrýt planety';
-});
-
 
 function showPopupOnObject(object) {
     const popup = document.getElementById("popup-info");
@@ -698,3 +780,13 @@ function showPopupOnObject(object) {
     popup.style.display = "block";
     popupTarget = object;
 }
+
+document.getElementById('toggle-highlight').addEventListener('click', () => {
+    highlightEnabled = !highlightEnabled;
+    document.getElementById('toggle-highlight').textContent =
+        `✨ Zvýraznění objektů: ${highlightEnabled ? "Zapnuto" : "Vypnuto"}`;
+    if (!highlightEnabled && highlightHalo) {
+        scene.remove(highlightHalo);
+        highlightHalo = null;
+    }
+});

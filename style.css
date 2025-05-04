@@ -204,3 +204,15 @@ canvas {
     border-radius: 0 0 0 8px;
     padding: 8px;
 }
+
+#toggle-highlight {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    background: #2A2A2ACC;
+    color: #ffffff;
+    border: 1px;
+    cursor: pointer;
+    border-radius: 8px 8px 8px 8px;
+    margin-bottom: 6px;
+}
