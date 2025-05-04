@@ -31,11 +31,19 @@
         <button id="reset-speed" title="Reset rychlosti">🔁</button>
         <div id="speed-display">🔄 Rychlost: 1×</div>
     </div>
-    <div id="object-list-wrapper">
-        <button id="toggle-highlight">✨ Zvýraznění objektů: Vypnuto</button>
-        <br>
-        <button id="toggle-orbits">✨ Orbitální čáry: Zapnuto</button>
-        <div id="object-list"></div>
+    <div id="side-panels">
+        <div id="object-list-wrapper">
+            <button id="toggle-highlight">✨ Zvýraznění objektů: Vypnuto</button>
+            <br>
+            <button id="toggle-orbits">✨ Orbitální čáry: Zapnuto</button>
+            <div id="object-list"></div>
+        </div>
+        <div id="info-panel" class="info-panel hidden">
+            <div class="popup-title">🪐 Objekt</div>
+            <img id="info-image" src="" alt="" style="width: 150px; height: 150px; margin: 10px 0; object-fit: cover; border-radius: 8px;">
+            <div id="info-text" class="popup-info-text"></div>
+        </div>
+
     </div>
     <section id="solar-system">
         <div id="solar-system-container"></div>

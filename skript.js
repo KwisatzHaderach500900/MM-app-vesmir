@@ -247,7 +247,7 @@ function initSolarSystem() {
             },
             { name: "Mars",
                 radius: 5.5,
-                semiMajorAxis: 228,
+                semiMajorAxis: 208,
                 eccentricity: 0.0934,
                 inclination: 1.85,
                 speed: 0.008,
@@ -622,7 +622,8 @@ function getMouseRaycaster(event) {
                 }
             } else {
                 popupTarget = null;
-                document.getElementById('popup-info').style.display = 'none';
+                //document.getElementById('popup-info').style.display = 'none';
+                document.getElementById('info-panel').classList.add('hidden');
             }
         });
 function updateSpeedDisplay() {
@@ -874,18 +875,27 @@ function setHighlightHalo(object, show = true) {
 }
 
 function showPopupOnObject(object) {
-    const popup = document.getElementById("popup-info");
+    //const popup = document.getElementById("popup-info");
     const name = object.userData?.name || "Neznámý objekt";
     const info = object.userData?.info || "";
     const preview = object.userData?.preview;
+    const infoPanel = document.getElementById("info-panel");
+    const imageEl = document.getElementById("info-image");
+    const textEl = document.getElementById("info-text");
 
-    popup.innerHTML = `
+    infoPanel.querySelector(".popup-title").innerText = `🪐 ${name}`;
+    imageEl.src = preview;
+    imageEl.alt = name;
+    textEl.innerHTML = info;
+
+    infoPanel.classList.remove("hidden");
+    popupTarget = object;
+    /*popup.innerHTML = `
         <div class="popup-title">🪐 ${name}</div>
         ${preview ? `<img src="${preview}" alt="${name}" width="150" height="150" style="margin: 5px 0; object-fit: cover; border-radius: 8px;" />` : ""}
         <div class="popup-info-text">${info}</div>
     `;
-    popup.style.display = "block";
-    popupTarget = object;
+    popup.style.display = "block";*/
 }
 
 document.getElementById('toggle-highlight').addEventListener('click', () => {
