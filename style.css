@@ -205,8 +205,8 @@ canvas {
     padding: 8px;
 }
 
-#toggle-highlight {
-    width: 100%;
+#toggle-highlight,#toggle-orbits {
+    width: auto;
     padding: 6px 10px;
     font-size: 14px;
     background: #2A2A2ACC;

@@ -27,8 +27,10 @@ const mouse = new THREE.Vector2();
 let highlightHalo = null;
 let highlightEnabled = false;
 let highlightedObject = null;
+let orbitsVisible = true;
+const orbitLines = [];
 
-class PlanetTrail {
+/*class PlanetTrail {
     constructor(color) {
         this.points = [];
         this.trailLength = 5000;
@@ -42,7 +44,7 @@ class PlanetTrail {
         if (this.points.length > this.trailLength) this.points.shift();
         this.geometry.setFromPoints(this.points);
     }
-}
+}*/
 function getOrbitColor(type) {
     switch (type) {
         case "planet": return 0x00aaff;
@@ -59,15 +61,21 @@ function createOrbitEllipse(config) {
     const inclination = config.inclination * Math.PI / 180;
     const segments = 360;
     const points = [];
+
     for (let i = 0; i <= segments; i++) {
         const angle = (i / segments) * 2 * Math.PI;
-        const r = a * (1 - e ** 2) / (1 + e * Math.cos(angle));
+        let x, z;
 
-        const x = r * Math.cos(angle);
-        const y = 0;
-        const z = r * Math.sin(angle);
+        if (config.type === "comet" && e > 0.6) {
+            x = a * (Math.cos(angle) - e);
+            z = a * Math.sqrt(1 - e * e) * Math.sin(angle);
+        } else {
+            const r = a * (1 - e ** 2) / (1 + e * Math.cos(angle));
+            x = r * Math.cos(angle);
+            z = r * Math.sin(angle);
+        }
 
-        points.push(new THREE.Vector3(x, y, z));
+        points.push(new THREE.Vector3(x, 0, z));
     }
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({
@@ -76,20 +84,24 @@ function createOrbitEllipse(config) {
         opacity: 0.4
     });
     const ellipse = new THREE.LineLoop(geometry, material);
-    ellipse.position.x = -a * e;
+    if (!(config.type === "comet" && e > 0.6)) {
+        ellipse.position.x = -a * e;
+    }
     ellipse.rotation.x = inclination;
     return ellipse;
 }
 
-function updateCameraPosition(targetPosition) {
-    const desiredPosition = new THREE.Vector3(
-        targetPosition.x + cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta),
-        targetPosition.y + cameraRadius * Math.cos(cameraPhi),
-        targetPosition.z + cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta)
+function updateCameraPosition(object3D) {
+    const worldPos = new THREE.Vector3();
+    object3D.getWorldPosition(worldPos);
+    const offset = new THREE.Vector3(
+        cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta),
+        cameraRadius * Math.cos(cameraPhi),
+        cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta)
     );
-
+    const desiredPosition = new THREE.Vector3().addVectors(worldPos, offset);
     camera.position.lerp(desiredPosition, lerpFactor);
-    camera.lookAt(targetPosition);
+    camera.lookAt(worldPos);
 }
 
 function focusOnPlanet(planetMesh) {
@@ -98,30 +110,30 @@ function focusOnPlanet(planetMesh) {
 
     if (planetMesh === sun) {
         cameraRadius = 300;
-        //cameraTheta = Math.PI / 4;
-        //cameraPhi = Math.PI / 2.5;
     } else {
         cameraRadius = planetMesh.userData.radius * 15;
-        //cameraTheta = 0;
-        //cameraPhi = Math.PI / 2;
     }
     cameraRadius = Math.max(minDistance, cameraRadius);
-    updateCameraPosition(planetMesh.position);
+    const worldPos = new THREE.Vector3();
+    planetMesh.getWorldPosition(worldPos);
+    updateCameraPosition(planetMesh);
 }
 
 function getPlanetPosition(config, time) {
     const angle = time * config.speed;
     const a = config.semiMajorAxis;
     const e = config.eccentricity;
-    const r = a * (1 - e ** 2) / (1 + e * Math.cos(angle));
-    const x = r * Math.cos(angle);
+
+    if (config.type === "comet" && e > 0.6) {
+        const x = a * (Math.cos(angle) - e);
+        const z = a * Math.sqrt(1 - e * e) * Math.sin(angle);
+        return new THREE.Vector3(x, 0, z);
+    }
+
+    const r = a * (1 - e * e) / (1 + e * Math.cos(angle));
+    const x = r * Math.cos(angle) - a * e;
     const z = r * Math.sin(angle);
-    const y = 0;
-    const position = new THREE.Vector3(x, y, z);
-    position.x -= a * e;
-    const inclination = config.inclination * Math.PI / 180;
-    position.applyAxisAngle(new THREE.Vector3(1, 0, 0), inclination);
-    return position;
+    return new THREE.Vector3(x, 0, z);
 }
 
 function initSolarSystem() {
@@ -346,48 +358,48 @@ function initSolarSystem() {
             },
             {
                 name: "Halleyova kometa",
-                radius: 2,
-                semiMajorAxis: 2500,
+                radius: 1,
+                semiMajorAxis: 1200,
                 eccentricity: 0.85,
                 inclination: 162.26,
                 speed: 0.00075,
-                texture: 'textures/comet_halley.jpg',
+                texture: 'textures/KOMETA.png',
                 color: 0xffffff,
                 type: "comet",
                 info: "Nejslavnější periodická kometa. Oběh kolem Slunce: 75 let. Vzdálenost od Slunce: 0,6–35 AU. Teplota: ~−70 °C až −220 °C. Vychýlení oběžné dráhy: 0,967. Retrográdní oběžná rychlost: ~54 km/s v perihéliu."
             },
             {
                 name: "Hale-Boppova kometa",
-                radius: 3,
+                radius: 1,
                 semiMajorAxis: 2500,
                 eccentricity: 0.9,
                 inclination: 89.4,
                 speed: 0.00009,
-                texture: 'textures/comet_hale_bopp.jpg',
+                texture: 'textures/KOMETA.png',
                 color: 0xccffff,
                 type: "comet",
                 info: "Jasná a výrazná kometa viditelná v roce 1997. Vzdálenost od Slunce: až 370 AU. Délka oběhu: ~2533 let. Vychýlení oběžné dráhy: 0,995. Teplota: ~−200 °C. Rychlost u Slunce: až 45 km/s."
             },
             {
                 name: "Enckeova kometa",
-                radius: 1.5,
-                semiMajorAxis: 388,
+                radius: 1,
+                semiMajorAxis: 230, //edit z 388 na 220
                 eccentricity: 0.75,
                 inclination: 11.8,
                 speed: 0.0045,
-                texture: 'textures/comet_encke.jpg',
+                texture: 'textures/KOMETA.png',
                 color: 0xdddddd,
                 type: "comet",
                 info: "Kometa s nejkratší známou periodou (~3,3 roku). Vzdálenost od Slunce: 0,34–4,1 AU. Teplota: až 300 °C v perihéliu. Vychýlení oběžné dráhy: 0,85. Rychlost: až 70 km/s."
             },
             {
                 name: "Kohoutkova kometa",
-                radius: 2.5,
-                semiMajorAxis: 640,
+                radius: 1,
+                semiMajorAxis: 230,
                 eccentricity: 0.9,
                 inclination: 13.3,
                 speed: 0.00095,
-                texture: 'textures/comet_kohoutek.jpg',
+                texture: 'textures/KOMETA.png',
                 color: 0xddddff,
                 type: "comet",
                 info: "Slavná kometa pozorovaná v roce 1973. Velmi výstřední dráha (téměř parabolická). Oběžná doba: ~75 000 let. Vzdálenost od Slunce: až 350 AU. Vychýlení dráhy: 0,999."
@@ -407,26 +419,54 @@ function initSolarSystem() {
                 materialOptions.emissiveIntensity = config.emissiveIntensity || 0.2;
             }
 
-            const planet = new THREE.Mesh(
-                new THREE.SphereGeometry(config.radius, 32, 32),
-                new THREE.MeshPhongMaterial(materialOptions)
-            );
+            function createDeformedCometGeometry(radius) {
+                const geometry = new THREE.SphereGeometry(radius, 16, 16);
+                const positionAttribute = geometry.attributes.position;
+
+                for (let i = 0; i < positionAttribute.count; i++) {
+                    const x = positionAttribute.getX(i);
+                    const y = positionAttribute.getY(i);
+                    const z = positionAttribute.getZ(i);
+                    const scale = THREE.MathUtils.randFloat(0.8, 1.1);
+                    positionAttribute.setXYZ(i, x * scale, y * scale, z * scale);
+                }
+
+                positionAttribute.needsUpdate = true;
+                geometry.computeVertexNormals();
+
+                return geometry;
+            }
+
+
+            let geometry;
+            if (config.type === "comet") {
+                geometry = createDeformedCometGeometry(config.radius);
+            } else {
+                geometry = new THREE.SphereGeometry(config.radius, 32, 32);
+            }
+
+            const planet = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial(materialOptions));
+
+
+            const planetGroup = new THREE.Group();
+            planetGroup.rotation.x = config.inclination * Math.PI / 180;
+            planetGroup.add(planet);
 
             const hitbox = new THREE.Mesh(
                 new THREE.SphereGeometry(config.radius * 3.5, 32, 32),
-                new THREE.MeshBasicMaterial({ visible: true, color: 0xff00ff, wireframe: true})
+                new THREE.MeshBasicMaterial({ visible: true, color: 0xff00ff, wireframe: true })
             );
             hitbox.geometry.computeBoundingSphere();
             hitbox.raycast = THREE.Mesh.prototype.raycast;
             hitbox.userData = { planetMesh: planet, name: config.name };
             hitboxes.push(hitbox);
-            //planet.add(hitbox);
 
             const position = getPlanetPosition(config, now);
-            planet.position.copy(position);
+            planet.position.set(position.x, 0, position.z);
 
             if (config.semiMajorAxis > 0) {
                 const orbit = createOrbitEllipse(config);
+                orbitLines.push(orbit);
                 scene.add(orbit);
             }
 
@@ -436,12 +476,15 @@ function initSolarSystem() {
             planet.userData = {
                 ...config,
                 inclination: config.inclination * Math.PI / 180,
-                trail: new PlanetTrail(config.color),
+                //trail: new PlanetTrail(config.color),
                 initialTime: now
             };
 
-            scene.add(planet.userData.trail.line);
-            scene.add(planet);
+            //scene.add(planet.userData.trail.line);
+            scene.add(planetGroup);
+            if (config.type === "comet") {
+                createCometTail(planet, sun);
+            }
             return planet;
         });
         createAsteroidBeltInstanced();
@@ -478,15 +521,16 @@ function getMouseRaycaster(event) {
         const onMouseMove = (event) => {
             getMouseRaycaster(event);
             const intersects = raycaster.intersectObjects(planets, true);
-            if (intersects.length > 0) {
-                hoveredObject = intersects[0].object;
+            const validHover = intersects.find(hit => !hit.object.userData.ignoreClick);
+
+            if (validHover) {
+                hoveredObject = validHover.object;
                 document.getElementById('hover-tooltip').style.display = 'block';
             } else {
                 hoveredObject = null;
                 document.getElementById('hover-tooltip').style.display = 'none';
             }
 
-            // Ovládání kamery (otáčení)
             if (!isDragging) return;
             const delta = {
                 x: event.clientX - previousMousePosition.x,
@@ -519,26 +563,22 @@ function getMouseRaycaster(event) {
             if (isDragging) return;
             getMouseRaycaster(event);
             //drawRaycasterRay(raycaster);
-            //console.log("Mouse position:", mouse);
             scene.updateMatrixWorld(true);
             const clickableObjects = [sun, ...planets];
             const intersects = raycaster.intersectObjects(clickableObjects, true);
-            //console.log("Intersections found:", intersects);
 
-            if (intersects.length > 0) {
-                const clickedObject = intersects[0].object;
+            const validHit = intersects.find(hit => !hit.object.userData.ignoreClick);
+            if (validHit) {
+                const clickedObject = validHit.object;
                 const targetPlanet = clickedObject.userData?.planetMesh || clickedObject;
-                //console.log("Clicked on:", clickedObject.userData?.name || "Sun");
                 focusOnPlanet(targetPlanet);
                 showPopupOnObject(targetPlanet);
                 if (targetPlanet.userData?.type === 'star') {
                     cameraRadius = 300;
                 }
             } else {
-                //console.log("No object clicked");
                 popupTarget = null;
-                const popup = document.getElementById('popup-info');
-                popup.style.display = 'none';
+                document.getElementById('popup-info').style.display = 'none';
             }
         });
 function updateSpeedDisplay() {
@@ -596,7 +636,9 @@ function updateSpeedDisplay() {
     }
 }
 function getScreenPosition(object3D, camera, renderer) {
-    const vector = object3D.position.clone().project(camera);
+    const worldPos = new THREE.Vector3();
+    object3D.getWorldPosition(worldPos);
+    const vector = worldPos.project(camera);
     const rect = renderer.domElement.getBoundingClientRect();
     return {
         x: (vector.x * 0.5 + 0.5) * rect.width + rect.left,
@@ -620,14 +662,27 @@ function animate(timestamp) {
             const data = planet.userData;
             const time = data.initialTime + simulatedTime;
             const position = getPlanetPosition(data, time);
-            planet.position.copy(position);
-            planet.rotation.y += 0.01 * speedFactor;
-            //deaktivace/aktivace trailů všech planet
-            data.trail.update(planet.position);
+            planet.position.set(position.x, 0, position.z);
+
+            if (data.type === 'planet' || data.type === 'transneptunic'|| data.type === 'sun') {
+                planet.rotation.y += 0.01 * speedFactor;
+            }
+            if (data.type === "comet" && planet.userData.tail) {
+                const cometWorldPos = new THREE.Vector3();
+                planet.getWorldPosition(cometWorldPos);
+                const sunWorldPos = new THREE.Vector3();
+                sun.getWorldPosition(sunWorldPos);
+                const direction = new THREE.Vector3().subVectors(cometWorldPos, sunWorldPos).normalize();
+                const tail = planet.userData.tail;
+                const target = new THREE.Vector3().addVectors(planet.position, direction);
+                tail.lookAt(target);
+                tail.rotation.x += Math.PI;
+            }
+            //data.trail.update(planet.position);
         });
     }
 
-    updateCameraPosition(currentCameraTarget.position);
+    updateCameraPosition(currentCameraTarget);
     renderer.render(scene, camera);
 
     if (popupTarget) {
@@ -645,7 +700,7 @@ function animate(timestamp) {
         tooltip.style.top = `${y - 40}px`;
     }
     if (highlightHalo && highlightedObject) {
-        highlightHalo.position.copy(highlightedObject.position);
+        highlightedObject.getWorldPosition(highlightHalo.position);
 
         const pulseSpeed = 6;
         const scaleFactor = 1 + 0.6 * Math.sin(performance.now() * 0.001 * pulseSpeed);
@@ -790,3 +845,31 @@ document.getElementById('toggle-highlight').addEventListener('click', () => {
         highlightHalo = null;
     }
 });
+document.getElementById('toggle-orbits').addEventListener('click', () => {
+    orbitsVisible = !orbitsVisible;
+    orbitLines.forEach(orbit => {
+        orbit.visible = orbitsVisible;
+    });
+    document.getElementById('toggle-orbits').textContent =
+        `✨ Orbitální čáry: ${orbitsVisible ? "Zapnuto" : "Vypnuto"}`;
+});
+
+function createCometTail(comet, sun) {
+    const tailLength = comet.userData.radius * 8;
+    const tailGeometry = new THREE.ConeGeometry(comet.userData.radius * 0.5, tailLength, 8, 1, true);
+    const tailMaterial = new THREE.MeshBasicMaterial({
+        color: 0xccccff,
+        transparent: true,
+        opacity: 0.4,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+    });
+    const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+
+    tail.rotation.x = Math.PI;
+    tail.position.set(0, 0, 0);
+    tail.userData.ignoreClick = true;
+
+    comet.add(tail);
+    comet.userData.tail = tail;
+}
