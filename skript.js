@@ -205,6 +205,7 @@ function initSolarSystem() {
                 color: 0xffff00,
                 type: "star",
                 info: "Tak asi Slunce ne? Hvězda kámo, prostě jedinej a pravej bůh všech opic z planety Země.",
+                preview: 'textures/Sun.jpg',
                 emissive: 0xffffee,
                 emissiveIntensity: 0.1
             },
@@ -217,7 +218,8 @@ function initSolarSystem() {
                 texture: 'textures/2k_mercury.jpg',
                 color: 0x808080,
                 type: "planet",
-                info: "První planeta Sluneční soustavy. Vzdálenost od Slunce: 58 milionů km. Délka dne a noci: 59 dní. Povrchový tlak: téměř nulový, teplota: −180 °C až +430 °C. Vychýlení oběžné dráhy: 0,206. Oběžná rychlost: 47,9 km/s."
+                info: "První planeta Sluneční soustavy. Vzdálenost od Slunce: 58 milionů km. Délka dne a noci: 59 dní. Povrchový tlak: téměř nulový, teplota: −180 °C až +430 °C. Vychýlení oběžné dráhy: 0,206. Oběžná rychlost: 47,9 km/s.",
+                preview: 'textures/Mercury.jpg'
             },
             { name: "Venuše",
                 radius: 6.8,
@@ -228,6 +230,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_venus_surface.jpg',
                 color: 0xffd700,
                 type: "planet",
+                preview: 'textures/Venus.jpg',
                 info: "Druhá planeta Sluneční soustavy. Vzdálenost od Slunce: 108 milionů km. Délka dne a noci: 243 dní (retrográdní rotace). Povrchový tlak: ~92x vyšší než Země, teplota: ~465 °C. Vychýlení oběžné dráhy: 0,007. Oběžná rychlost: 35,0 km/s."
             },
             { name: "Země",
@@ -239,6 +242,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_earth_daymap.jpg',
                 color: 0x0000ff,
                 type: "planet",
+                preview: 'textures/Rotating_earth_animated_transparent.gif',
                 info: "Třetí planeta Sluneční soustavy. Vzdálenost od Slunce: 150 milionů km. Délka dne a noci: 24 hodin. Povrchový tlak: 101,3 kPa, teplota: −88 °C až +58 °C. Vychýlení oběžné dráhy: 0,017. Oběžná rychlost: 29,8 km/s."
             },
             { name: "Mars",
@@ -250,6 +254,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_mars.jpg',
                 color: 0xff0000,
                 type: "planet",
+                preview: 'textures/Mars.jpg',
                 info: "Čtvrtá planeta Sluneční soustavy. Vzdálenost od Slunce: 228 milionů km. Délka dne a noci: 24,6 hodiny. Povrchový tlak: ~0,6 kPa, teplota: −125 °C až +20 °C. Vychýlení oběžné dráhy: 0,093. Oběžná rychlost: 24,1 km/s."
             },
             { name: "Jupiter",
@@ -261,6 +266,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_jupiter.jpg',
                 color: 0xffa500,
                 type: "planet",
+                preview: 'textures/Jupiter.jpg',
                 info: "Pátá a největší planeta Sluneční soustavy. Vzdálenost od Slunce: 778 milionů km. Délka dne a noci: 9,9 hodin. Povrchový tlak: velmi vysoký (plynný obor), teplota: ~−145 °C. Vychýlení oběžné dráhy: 0,049. Oběžná rychlost: 13,1 km/s."
             },
             { name: "Saturn",
@@ -272,6 +278,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_saturn.jpg',
                 color: 0xffd700,
                 type: "planet",
+                preview: 'textures/Saturn.jpg',
                 info: "Šestá planeta Sluneční soustavy. Vzdálenost od Slunce: 1,43 miliardy km. Délka dne a noci: 10,7 hodin. Povrchový tlak: vysoký, teplota: ~−178 °C. Vychýlení oběžné dráhy: 0,057. Oběžná rychlost: 9,7 km/s."
             },
             { name: "Uran",
@@ -283,6 +290,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_uranus.jpg',
                 color: 0x00ffff,
                 type: "planet",
+                preview: 'textures/Uranus.jpg',
                 info: "Sedmá planeta Sluneční soustavy. Vzdálenost od Slunce: 2,87 miliardy km. Délka dne a noci: 17,2 hodin. Povrchový tlak: nejasný, teplota: ~−224 °C. Vychýlení oběžné dráhy: 0,046. Oběžná rychlost: 6,8 km/s."
             },
             { name: "Neptun",
@@ -294,6 +302,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_neptune.jpg',
                 color: 0x0000cd,
                 type: "planet",
+                preview: 'textures/Neptune.png',
                 info: "Osmá planeta Sluneční soustavy. Vzdálenost od Slunce: 4,5 miliardy km. Délka dne a noci: 16 hodin. Povrchový tlak: neznámý, teplota: ~−218 °C. Vychýlení oběžné dráhy: 0,010. Oběžná rychlost: 5,4 km/s."
             },
             {
@@ -306,6 +315,7 @@ function initSolarSystem() {
                 texture: 'textures/plu0rss1.jpg',
                 color: 0xbfbfbf,
                 type: "transneptunic",
+                preview: 'textures/Pluto.jpg',
                 info: "Trpasličí planeta ve vnější části Sluneční soustavy. Vzdálenost od Slunce: 5,9 miliardy km. Délka dne a noci: 6,4 dne. Povrchový tlak: ~1 Pa, teplota: −229 °C. Vychýlení oběžné dráhy: 0,249. Oběžná rychlost: 4,7 km/s."
             },
             {
@@ -318,6 +328,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_ceres_fictional.jpg',
                 color: 0x999999,
                 type: "transneptunic",
+                preview: 'textures/Ceres.jpg',
                 info: "Trpasličí planeta a největší objekt hlavního pásu asteroidů. Vzdálenost od Slunce: 414 milionů km. Délka dne a noci: 9 hodin. Povrchový tlak: velmi nízký, teplota: −105 °C. Vychýlení oběžné dráhy: 0,076. Oběžná rychlost: 17,9 km/s."
             },
             {
@@ -366,6 +377,7 @@ function initSolarSystem() {
                 texture: 'textures/KOMETA.png',
                 color: 0xffffff,
                 type: "comet",
+                preview: 'textures/Halley.jpg',
                 info: "Nejslavnější periodická kometa. Oběh kolem Slunce: 75 let. Vzdálenost od Slunce: 0,6–35 AU. Teplota: ~−70 °C až −220 °C. Vychýlení oběžné dráhy: 0,967. Retrográdní oběžná rychlost: ~54 km/s v perihéliu."
             },
             {
@@ -378,6 +390,7 @@ function initSolarSystem() {
                 texture: 'textures/KOMETA.png',
                 color: 0xccffff,
                 type: "comet",
+                preview: 'textures/HB.jpg',
                 info: "Jasná a výrazná kometa viditelná v roce 1997. Vzdálenost od Slunce: až 370 AU. Délka oběhu: ~2533 let. Vychýlení oběžné dráhy: 0,995. Teplota: ~−200 °C. Rychlost u Slunce: až 45 km/s."
             },
             {
@@ -390,6 +403,7 @@ function initSolarSystem() {
                 texture: 'textures/KOMETA.png',
                 color: 0xdddddd,
                 type: "comet",
+                preview: 'textures/Encke.png',
                 info: "Kometa s nejkratší známou periodou (~3,3 roku). Vzdálenost od Slunce: 0,34–4,1 AU. Teplota: až 300 °C v perihéliu. Vychýlení oběžné dráhy: 0,85. Rychlost: až 70 km/s."
             },
             {
@@ -402,6 +416,7 @@ function initSolarSystem() {
                 texture: 'textures/KOMETA.png',
                 color: 0xddddff,
                 type: "comet",
+                preview: 'textures/Kohoutek.jpg',
                 info: "Slavná kometa pozorovaná v roce 1973. Velmi výstřední dráha (téměř parabolická). Oběžná doba: ~75 000 let. Vzdálenost od Slunce: až 350 AU. Vychýlení dráhy: 0,999."
             }
         ];
@@ -483,10 +498,34 @@ function initSolarSystem() {
             //scene.add(planet.userData.trail.line);
             scene.add(planetGroup);
             if (config.type === "comet") {
-                createCometTail(planet, sun);
+                createCometTail(planet);
             }
             return planet;
         });
+        const earth = planets.find(p => p.userData.name === "Země");
+        if (earth) {
+            const moonRadius = 1.5;
+            const moonDistance = 15;
+            const moonSpeed = THREE.MathUtils.degToRad(13.177);
+            const moonGeometry = new THREE.SphereGeometry(moonRadius, 32, 32);
+            const moonMaterial = new THREE.MeshPhongMaterial({
+                map: textureLoader.load('textures/Moon_texture.jpg')
+            });
+            const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+            moon.userData = {
+                name: "Měsíc",
+                type: "moon",
+                parent: earth,
+                orbitRadius: moonDistance,
+                speed: moonSpeed,
+                initialAngle: 0,
+                preview: 'textures/Moon.gif',
+                info: "Měsíc je přirozený satelit Země. Obíhá ji ve vzdálenosti ~384 400 km. Oběžná doba: 27,3 dní."
+            };
+            scene.add(moon);
+            planets.push(moon);
+        }
+
         createAsteroidBeltInstanced();
         sun = planets.find(p => p.userData.type === "star");
         currentCameraTarget = sun;
@@ -571,8 +610,13 @@ function getMouseRaycaster(event) {
             if (validHit) {
                 const clickedObject = validHit.object;
                 const targetPlanet = clickedObject.userData?.planetMesh || clickedObject;
-                focusOnPlanet(targetPlanet);
+
+                if (targetPlanet.userData?.type !== 'moon') {
+                    focusOnPlanet(targetPlanet);
+                }
+
                 showPopupOnObject(targetPlanet);
+
                 if (targetPlanet.userData?.type === 'star') {
                     cameraRadius = 300;
                 }
@@ -673,10 +717,16 @@ function animate(timestamp) {
                 const sunWorldPos = new THREE.Vector3();
                 sun.getWorldPosition(sunWorldPos);
                 const direction = new THREE.Vector3().subVectors(cometWorldPos, sunWorldPos).normalize();
-                const tail = planet.userData.tail;
-                const target = new THREE.Vector3().addVectors(planet.position, direction);
-                tail.lookAt(target);
-                tail.rotation.x += Math.PI;
+                const angle = Math.atan2(direction.x, direction.z);
+                planet.userData.tail.material.rotation = angle;
+            }
+            if (data.type === "moon" && data.parent) {
+                const parentPos = new THREE.Vector3();
+                data.parent.getWorldPosition(parentPos);
+                const angle = data.initialAngle + simulatedTime * data.speed;
+                const x = parentPos.x + data.orbitRadius * Math.cos(angle);
+                const z = parentPos.z + data.orbitRadius * Math.sin(angle);
+                planet.position.set(x, 0, z);
             }
             //data.trail.update(planet.position);
         });
@@ -827,9 +877,11 @@ function showPopupOnObject(object) {
     const popup = document.getElementById("popup-info");
     const name = object.userData?.name || "Neznámý objekt";
     const info = object.userData?.info || "";
+    const preview = object.userData?.preview;
 
     popup.innerHTML = `
         <div class="popup-title">🪐 ${name}</div>
+        ${preview ? `<img src="${preview}" alt="${name}" width="150" height="150" style="margin: 5px 0; object-fit: cover; border-radius: 8px;" />` : ""}
         <div class="popup-info-text">${info}</div>
     `;
     popup.style.display = "block";
@@ -854,22 +906,21 @@ document.getElementById('toggle-orbits').addEventListener('click', () => {
         `✨ Orbitální čáry: ${orbitsVisible ? "Zapnuto" : "Vypnuto"}`;
 });
 
-function createCometTail(comet, sun) {
-    const tailLength = comet.userData.radius * 8;
-    const tailGeometry = new THREE.ConeGeometry(comet.userData.radius * 0.5, tailLength, 8, 1, true);
-    const tailMaterial = new THREE.MeshBasicMaterial({
+function createCometTail(comet) {
+    const tailTexture = new THREE.TextureLoader().load('textures/comet_tail_texture2.png');
+    const tailMaterial = new THREE.SpriteMaterial({
+        map: tailTexture,
         color: 0xccccff,
         transparent: true,
-        opacity: 0.4,
-        depthWrite: false,
-        side: THREE.DoubleSide,
+        opacity: 0.7,
+        depthWrite: false
     });
-    const tail = new THREE.Mesh(tailGeometry, tailMaterial);
-
-    tail.rotation.x = Math.PI;
-    tail.position.set(0, 0, 0);
+    const tail = new THREE.Sprite(tailMaterial);
+    const width = comet.userData.radius * 10;
+    const height = comet.userData.radius * 35;
+    tail.scale.set(width, height, 1);
+    tail.center.set(0.5, 0);
     tail.userData.ignoreClick = true;
-
     comet.add(tail);
     comet.userData.tail = tail;
 }

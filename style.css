@@ -53,15 +53,12 @@ canvas {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin: 10px auto 10px auto;
     padding: 5px 5px 5px 5px;
     gap: 10px;
     background: rgba(42, 42, 42, 0.8);
     border-radius: 8px;
     max-width: 90%;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .controls button {
@@ -198,7 +195,6 @@ canvas {
 
 .object-sublist {
     list-style: none;
-    padding: 0;
     margin: 0;
     background: rgba(0, 0, 0, 0.5);
     border-radius: 0 0 0 8px;
