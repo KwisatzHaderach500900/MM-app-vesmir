@@ -117,7 +117,8 @@ function initSolarSystem() {
             })
         );
         sun.userData = { name: 'Slunce',
-        info: "Tak asi Slunce ne? Hvězda kámo, prostě jedinej a pravej bůh všech opic z planety Země."
+            type: "star",
+            info: "Tak asi Slunce ne? Hvězda kámo, prostě jedinej a pravej bůh všech opic z planety Země."
         };
         scene.add(sun);
         currentCameraTarget = sun;
@@ -216,7 +217,7 @@ function initSolarSystem() {
                 eccentricity: 0.2488,
                 inclination: 17.16,
                 speed: 0.00039,
-                texture: 'textures/pluto.jpg',
+                texture: 'textures/plu0rss1.jpg',
                 color: 0xbfbfbf,
                 type: "transneptunic",
                 info: "Trpasličí planeta ve vnější části Sluneční soustavy. Vzdálenost od Slunce: 5,9 miliardy km. Délka dne a noci: 6,4 dne. Povrchový tlak: ~1 Pa, teplota: −229 °C. Vychýlení oběžné dráhy: 0,249. Oběžná rychlost: 4,7 km/s."
@@ -228,7 +229,7 @@ function initSolarSystem() {
                 eccentricity: 0.0758,
                 inclination: 10.6,
                 speed: 0.0027,
-                texture: 'textures/ceres.jpg',
+                texture: 'textures/2k_ceres_fictional.jpg',
                 color: 0x999999,
                 type: "transneptunic",
                 info: "Trpasličí planeta a největší objekt hlavního pásu asteroidů. Vzdálenost od Slunce: 414 milionů km. Délka dne a noci: 9 hodin. Povrchový tlak: velmi nízký, teplota: −105 °C. Vychýlení oběžné dráhy: 0,076. Oběžná rychlost: 17,9 km/s."
@@ -240,8 +241,9 @@ function initSolarSystem() {
                 eccentricity: 0.188,
                 inclination: 28.2,
                 speed: 0.00029,
-                texture: 'textures/haumea.jpg',
+                texture: 'textures/2k_haumea_fictional.jpg',
                 color: 0xddddff,
+                type: "transneptunic",
                 info: "Trpasličí planeta s protáhlým tvarem. Vzdálenost od Slunce: 6,4 miliardy km. Délka dne a noci: 3,9 hodiny (nejrychlejší rotace). Povrchový tlak: žádný, teplota: −241 °C. Vychýlení oběžné dráhy: 0,188. Oběžná rychlost: 4,5 km/s."
             },
             {
@@ -251,7 +253,7 @@ function initSolarSystem() {
                 eccentricity: 0.159,
                 inclination: 28.96,
                 speed: 0.00026,
-                texture: 'textures/makemake.jpg',
+                texture: 'textures/2k_makemake_fictional.jpg',
                 color: 0xffcccc,
                 type: "transneptunic",
                 info: "Trpasličí planeta v Kuiperově pásu. Vzdálenost od Slunce: 6,85 miliardy km. Délka dne a noci: ~7,8 hodiny. Povrchový tlak: téměř nulový, teplota: ~−239 °C. Vychýlení oběžné dráhy: 0,159. Oběžná rychlost: 4,4 km/s."
@@ -263,7 +265,7 @@ function initSolarSystem() {
                 eccentricity: 0.44,
                 inclination: 44.0,
                 speed: 0.00016,
-                texture: 'textures/eris.jpg',
+                texture: 'textures/2k_eris_fictional.jpg',
                 color: 0xe0e0e0,
                 type: "transneptunic",
                 info: "Jedna z největších trpasličích planet. Vzdálenost od Slunce: 10,1 miliardy km. Délka dne a noci: ~25,9 hodiny. Povrchový tlak: žádný, teplota: −231 °C. Vychýlení oběžné dráhy: 0,44. Oběžná rychlost: 3,4 km/s."
@@ -271,11 +273,11 @@ function initSolarSystem() {
             {
                 name: "Halleyova kometa",
                 radius: 2,
-                semiMajorAxis: 2600, // 2,6 miliardy km
+                semiMajorAxis: 2600,
                 eccentricity: 0.967,
-                inclination: 162.26, // retrográdní (sklon > 90°)
+                inclination: 162.26,
                 speed: 0.00075,
-                texture: 'textures/comet_halley.jpg', // nebo 'textures/comet.jpg'
+                texture: 'textures/comet_halley.jpg',
                 color: 0xffffff,
                 type: "comet",
                 info: "Nejslavnější periodická kometa. Oběh kolem Slunce: 75 let. Vzdálenost od Slunce: 0,6–35 AU. Teplota: ~−70 °C až −220 °C. Vychýlení oběžné dráhy: 0,967. Retrográdní oběžná rychlost: ~54 km/s v perihéliu."
@@ -578,16 +580,25 @@ function createObjectList(objects) {
 
     container.innerHTML = `
         <div class="object-section">
+            <button class="toggle-section" data-target="star-list">🪐 Hvězdy</button>
+            <ul id="star-list" class="object-sublist"></ul>
+        </div>
+        <div class="object-section">
             <button class="toggle-section" data-target="planet-list">🪐 Planety</button>
             <ul id="planet-list" class="object-sublist"></ul>
+        </div>
+        <div class="object-section">
+            <button class="toggle-section" data-target="transneptunic-list">🪐 Planetoidy</button>
+            <ul id="transneptunic-list" class="object-sublist"></ul>
         </div>
         <div class="object-section">
             <button class="toggle-section" data-target="comet-list">☄️ Komety</button>
             <ul id="comet-list" class="object-sublist"></ul>
         </div>
     `;
-
+    const starList = document.getElementById('star-list');
     const planetList = document.getElementById('planet-list');
+    const transneptunicList = document.getElementById('transneptunic-list');
     const cometList = document.getElementById('comet-list');
 
     const sunItem = document.createElement('li');
@@ -596,7 +607,7 @@ function createObjectList(objects) {
         focusOnPlanet(sun);
         showPopupOnObject(sun);
     });
-    planetList.appendChild(sunItem);
+    starList.appendChild(sunItem);
 
     objects.forEach(obj => {
         const item = document.createElement('li');
@@ -615,7 +626,14 @@ function createObjectList(objects) {
 
         if (obj.userData.type === 'comet') {
             cometList.appendChild(item);
-        } else {
+        }
+        else if(obj.userData.type === 'transneptunic') {
+            transneptunicList.appendChild(item);
+        }
+        else if(obj.userData.type === 'star') {
+            starList.appendChild(item);
+        }
+        else {
             planetList.appendChild(item);
         }
     });
@@ -628,6 +646,9 @@ function createObjectList(objects) {
             list.style.display = visible ? 'none' : 'block';
         });
     });
+    document.getElementById('planet-list').style.display = 'none';
+    document.getElementById('transneptunic-list').style.display = 'none';
+    document.getElementById('comet-list').style.display = 'none';
 }
 
 function setHighlightHalo(object, show = true) {
