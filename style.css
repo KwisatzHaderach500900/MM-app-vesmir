@@ -7,8 +7,10 @@ body {
 }
 
 header {
-    text-align: center;
-    padding: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
     background: #2a2a2a;
 }
 
@@ -248,7 +250,7 @@ canvas {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(0, 0, 0, 0.6);
+    background: #2a2a2a;
     padding: 6px 10px;
     border-radius: 8px;
     backdrop-filter: blur(4px);

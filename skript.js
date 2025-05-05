@@ -445,10 +445,33 @@ function initSolarSystem() {
                 preview: 'textures/Kohoutek.jpg',
                 info: `Slavná kometa pozorovaná v roce 1973. Velmi výstřední dráha (téměř parabolická). Oběžná doba: ~75 000 let. Vzdálenost od Slunce: až 350 AU. Vychýlení dráhy: 0,999.
                     <br><a href="https://cs.wikipedia.org/wiki/Kohoutkova_kometa" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
+            },
+            {
+                name: "Voyager 2",
+                radius: 1.2,
+                semiMajorAxis: 5500,
+                eccentricity: 0.05,
+                inclination: 3,
+                speed: 0.00001,
+                color: 0xffaa00,
+                type: "probe",
+                glbPath: "textures/voyager.glb",
+                preview: "textures/Voyager.jpg",
+                info: `Voyager 2 je meziplanetární sonda vypuštěná NASA v roce 1977. Je jedinou sondou, která navštívila všechny čtyři obří planety. V roce 2018 opustila heliosféru a nyní putuje mezihvězdným prostorem.
+                <br><a href="https://cs.wikipedia.org/wiki/Voyager_2" target="_blank" style="color:#00ff9d;">🔗 Wikipedie</a><br>
+                <br>
+                Záznam ze Zlaté desky nesené Voyagerem 1 a 2.
+                <br>
+                <button onclick="document.getElementById('sun-audio').play()">▶️</button>
+                <button onclick="let a = document.getElementById('sun-audio'); a.pause(); a.currentTime = 0;">⏹️</button>
+                <audio id="sun-audio">
+                <source src="sound/Voyager.mp3" type="audio/mpeg">
+                </audio>`
             }
         ];
 
         const now = Date.now() / 1000;
+
         planets = planetsConfig.map((config) => {
             const materialOptions = {
                 map: textureLoader.load(config.texture),
@@ -529,6 +552,7 @@ function initSolarSystem() {
             }
             return planet;
         });
+
         const earth = planets.find(p => p.userData.name === "Země");
         if (earth) {
             const moonRadius = 1.5;
@@ -826,11 +850,16 @@ function createObjectList(objects) {
             <button class="toggle-section" data-target="comet-list">☄️ Komety</button>
             <ul id="comet-list" class="object-sublist"></ul>
         </div>
+        <div class="object-section">
+            <button class="toggle-section" data-target="probe-list">🛰️ Sondy</button>
+            <ul id="probe-list" class="object-sublist"></ul>
+        </div>
     `;
     const starList = document.getElementById('star-list');
     const planetList = document.getElementById('planet-list');
     const transneptunicList = document.getElementById('transneptunic-list');
     const cometList = document.getElementById('comet-list');
+    const probeList = document.getElementById('probe-list');
 
     objects.forEach(obj => {
         const item = document.createElement('li');
@@ -856,6 +885,9 @@ function createObjectList(objects) {
         else if(obj.userData.type === 'star') {
             starList.appendChild(item);
         }
+        else if (obj.userData.type === 'probe') {
+            probeList.appendChild(item);
+        }
         else {
             planetList.appendChild(item);
         }
@@ -873,6 +905,7 @@ function createObjectList(objects) {
     document.getElementById('planet-list').style.display = 'none';
     document.getElementById('transneptunic-list').style.display = 'none';
     document.getElementById('comet-list').style.display = 'none';
+    document.getElementById('probe-list').style.display = 'none';
 }
 
 function setHighlightHalo(object, show = true) {
