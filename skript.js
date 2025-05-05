@@ -204,7 +204,17 @@ function initSolarSystem() {
                 texture: 'textures/2k_sun.jpg',
                 color: 0xffff00,
                 type: "star",
-                info: "Tak asi Slunce ne? Hvězda kámo, prostě jedinej a pravej bůh všech opic z planety Země.",
+                info: `Tak asi Slunce ne? Hvězda kámo, prostě jedinej a pravej bůh všech opic z planety Země. 
+                <br><a href="https://cs.wikipedia.org/wiki/Slunce" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>
+                <br>
+                <br>
+                Zvuk Slunce
+                <br>
+                <button onclick="document.getElementById('sun-audio').play()">▶️</button>
+                <button onclick="let a = document.getElementById('sun-audio'); a.pause(); a.currentTime = 0;">⏹️</button>
+                <audio id="sun-audio">
+                <source src="sound/NASA-Sun-Sonification.mp3" type="audio/mpeg">
+                </audio>`,
                 preview: 'textures/Sun.jpg',
                 emissive: 0xffffee,
                 emissiveIntensity: 0.1
@@ -218,7 +228,8 @@ function initSolarSystem() {
                 texture: 'textures/2k_mercury.jpg',
                 color: 0x808080,
                 type: "planet",
-                info: "První planeta Sluneční soustavy. Vzdálenost od Slunce: 58 milionů km. Délka dne a noci: 59 dní. Povrchový tlak: téměř nulový, teplota: −180 °C až +430 °C. Vychýlení oběžné dráhy: 0,206. Oběžná rychlost: 47,9 km/s.",
+                info: `První planeta Sluneční soustavy. Vzdálenost od Slunce: 58 milionů km. Délka dne a noci: 59 dní. Povrchový tlak: téměř nulový, teplota: −180 °C až +430 °C. Vychýlení oběžné dráhy: 0,206. Oběžná rychlost: 47,9 km/s.
+                <br><a href="https://cs.wikipedia.org/wiki/Merkur_(planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`,
                 preview: 'textures/Mercury.jpg'
             },
             { name: "Venuše",
@@ -231,7 +242,8 @@ function initSolarSystem() {
                 color: 0xffd700,
                 type: "planet",
                 preview: 'textures/Venus.jpg',
-                info: "Druhá planeta Sluneční soustavy. Vzdálenost od Slunce: 108 milionů km. Délka dne a noci: 243 dní (retrográdní rotace). Povrchový tlak: ~92x vyšší než Země, teplota: ~465 °C. Vychýlení oběžné dráhy: 0,007. Oběžná rychlost: 35,0 km/s."
+                info: `Druhá planeta Sluneční soustavy. Vzdálenost od Slunce: 108 milionů km. Délka dne a noci: 243 dní (retrográdní rotace). Povrchový tlak: ~92x vyšší než Země, teplota: ~465 °C. Vychýlení oběžné dráhy: 0,007. Oběžná rychlost: 35,0 km/s.
+                <br><a href="https://cs.wikipedia.org/wiki/Venu%C5%A1e_(planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             { name: "Země",
                 radius: 7,
@@ -243,8 +255,9 @@ function initSolarSystem() {
                 color: 0x0000ff,
                 type: "planet",
                 preview: 'textures/Rotating_earth_animated_transparent.gif',
-                info: "Třetí planeta Sluneční soustavy. Vzdálenost od Slunce: 150 milionů km. Délka dne a noci: 24 hodin. Povrchový tlak: 101,3 kPa, teplota: −88 °C až +58 °C. Vychýlení oběžné dráhy: 0,017. Oběžná rychlost: 29,8 km/s."
-            },
+                info: `Třetí planeta Sluneční soustavy. Vzdálenost od Slunce: 150 milionů km. Délka dne a noci: 24 hodin. Povrchový tlak: 101,3 kPa, teplota: −88 °C až +58 °C. Vychýlení oběžné dráhy: 0,017. Oběžná rychlost: 29,8 km/s."
+                <br><a href="https://cs.wikipedia.org/wiki/Zem%C4%9B" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
+    },
             { name: "Mars",
                 radius: 5.5,
                 semiMajorAxis: 208,
@@ -255,7 +268,8 @@ function initSolarSystem() {
                 color: 0xff0000,
                 type: "planet",
                 preview: 'textures/Mars.jpg',
-                info: "Čtvrtá planeta Sluneční soustavy. Vzdálenost od Slunce: 228 milionů km. Délka dne a noci: 24,6 hodiny. Povrchový tlak: ~0,6 kPa, teplota: −125 °C až +20 °C. Vychýlení oběžné dráhy: 0,093. Oběžná rychlost: 24,1 km/s."
+                info: `Čtvrtá planeta Sluneční soustavy. Vzdálenost od Slunce: 228 milionů km. Délka dne a noci: 24,6 hodiny. Povrchový tlak: ~0,6 kPa, teplota: −125 °C až +20 °C. Vychýlení oběžné dráhy: 0,093. Oběžná rychlost: 24,1 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Mars_(planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             { name: "Jupiter",
                 radius: 11,
@@ -267,7 +281,8 @@ function initSolarSystem() {
                 color: 0xffa500,
                 type: "planet",
                 preview: 'textures/Jupiter.jpg',
-                info: "Pátá a největší planeta Sluneční soustavy. Vzdálenost od Slunce: 778 milionů km. Délka dne a noci: 9,9 hodin. Povrchový tlak: velmi vysoký (plynný obor), teplota: ~−145 °C. Vychýlení oběžné dráhy: 0,049. Oběžná rychlost: 13,1 km/s."
+                info: `Pátá a největší planeta Sluneční soustavy. Vzdálenost od Slunce: 778 milionů km. Délka dne a noci: 9,9 hodin. Povrchový tlak: velmi vysoký (plynný obor), teplota: ~−145 °C. Vychýlení oběžné dráhy: 0,049. Oběžná rychlost: 13,1 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Jupiter_(planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             { name: "Saturn",
                 radius: 10,
@@ -279,7 +294,8 @@ function initSolarSystem() {
                 color: 0xffd700,
                 type: "planet",
                 preview: 'textures/Saturn.jpg',
-                info: "Šestá planeta Sluneční soustavy. Vzdálenost od Slunce: 1,43 miliardy km. Délka dne a noci: 10,7 hodin. Povrchový tlak: vysoký, teplota: ~−178 °C. Vychýlení oběžné dráhy: 0,057. Oběžná rychlost: 9,7 km/s."
+                info: `Šestá planeta Sluneční soustavy. Vzdálenost od Slunce: 1,43 miliardy km. Délka dne a noci: 10,7 hodin. Povrchový tlak: vysoký, teplota: ~−178 °C. Vychýlení oběžné dráhy: 0,057. Oběžná rychlost: 9,7 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Saturn_(planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             { name: "Uran",
                 radius: 9,
@@ -291,7 +307,8 @@ function initSolarSystem() {
                 color: 0x00ffff,
                 type: "planet",
                 preview: 'textures/Uranus.jpg',
-                info: "Sedmá planeta Sluneční soustavy. Vzdálenost od Slunce: 2,87 miliardy km. Délka dne a noci: 17,2 hodin. Povrchový tlak: nejasný, teplota: ~−224 °C. Vychýlení oběžné dráhy: 0,046. Oběžná rychlost: 6,8 km/s."
+                info: `Sedmá planeta Sluneční soustavy. Vzdálenost od Slunce: 2,87 miliardy km. Délka dne a noci: 17,2 hodin. Povrchový tlak: nejasný, teplota: ~−224 °C. Vychýlení oběžné dráhy: 0,046. Oběžná rychlost: 6,8 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Uran_(planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             { name: "Neptun",
                 radius: 8.5,
@@ -303,7 +320,8 @@ function initSolarSystem() {
                 color: 0x0000cd,
                 type: "planet",
                 preview: 'textures/Neptune.png',
-                info: "Osmá planeta Sluneční soustavy. Vzdálenost od Slunce: 4,5 miliardy km. Délka dne a noci: 16 hodin. Povrchový tlak: neznámý, teplota: ~−218 °C. Vychýlení oběžné dráhy: 0,010. Oběžná rychlost: 5,4 km/s."
+                info: `Osmá planeta Sluneční soustavy. Vzdálenost od Slunce: 4,5 miliardy km. Délka dne a noci: 16 hodin. Povrchový tlak: neznámý, teplota: ~−218 °C. Vychýlení oběžné dráhy: 0,010. Oběžná rychlost: 5,4 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Neptun_(planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             {
                 name: "Pluto",
@@ -316,7 +334,8 @@ function initSolarSystem() {
                 color: 0xbfbfbf,
                 type: "transneptunic",
                 preview: 'textures/Pluto.jpg',
-                info: "Trpasličí planeta ve vnější části Sluneční soustavy. Vzdálenost od Slunce: 5,9 miliardy km. Délka dne a noci: 6,4 dne. Povrchový tlak: ~1 Pa, teplota: −229 °C. Vychýlení oběžné dráhy: 0,249. Oběžná rychlost: 4,7 km/s."
+                info: `Trpasličí planeta ve vnější části Sluneční soustavy. Vzdálenost od Slunce: 5,9 miliardy km. Délka dne a noci: 6,4 dne. Povrchový tlak: ~1 Pa, teplota: −229 °C. Vychýlení oběžné dráhy: 0,249. Oběžná rychlost: 4,7 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Pluto_(trpasli%C4%8D%C3%AD_planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             {
                 name: "Ceres",
@@ -329,7 +348,8 @@ function initSolarSystem() {
                 color: 0x999999,
                 type: "transneptunic",
                 preview: 'textures/Ceres.jpg',
-                info: "Trpasličí planeta a největší objekt hlavního pásu asteroidů. Vzdálenost od Slunce: 414 milionů km. Délka dne a noci: 9 hodin. Povrchový tlak: velmi nízký, teplota: −105 °C. Vychýlení oběžné dráhy: 0,076. Oběžná rychlost: 17,9 km/s."
+                info: `Trpasličí planeta a největší objekt hlavního pásu asteroidů. Vzdálenost od Slunce: 414 milionů km. Délka dne a noci: 9 hodin. Povrchový tlak: velmi nízký, teplota: −105 °C. Vychýlení oběžné dráhy: 0,076. Oběžná rychlost: 17,9 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Ceres_(trpasli%C4%8D%C3%AD_planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             {
                 name: "Haumea",
@@ -341,7 +361,8 @@ function initSolarSystem() {
                 texture: 'textures/2k_haumea_fictional.jpg',
                 color: 0xddddff,
                 type: "transneptunic",
-                info: "Trpasličí planeta s protáhlým tvarem. Vzdálenost od Slunce: 6,4 miliardy km. Délka dne a noci: 3,9 hodiny (nejrychlejší rotace). Povrchový tlak: žádný, teplota: −241 °C. Vychýlení oběžné dráhy: 0,188. Oběžná rychlost: 4,5 km/s."
+                info: `Trpasličí planeta s protáhlým tvarem. Vzdálenost od Slunce: 6,4 miliardy km. Délka dne a noci: 3,9 hodiny (nejrychlejší rotace). Povrchový tlak: žádný, teplota: −241 °C. Vychýlení oběžné dráhy: 0,188. Oběžná rychlost: 4,5 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Haumea_(trpasli%C4%8D%C3%AD_planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             {
                 name: "Makemake",
@@ -353,7 +374,8 @@ function initSolarSystem() {
                 texture: 'textures/2k_makemake_fictional.jpg',
                 color: 0xffcccc,
                 type: "transneptunic",
-                info: "Trpasličí planeta v Kuiperově pásu. Vzdálenost od Slunce: 6,85 miliardy km. Délka dne a noci: ~7,8 hodiny. Povrchový tlak: téměř nulový, teplota: ~−239 °C. Vychýlení oběžné dráhy: 0,159. Oběžná rychlost: 4,4 km/s."
+                info: `Trpasličí planeta v Kuiperově pásu. Vzdálenost od Slunce: 6,85 miliardy km. Délka dne a noci: ~7,8 hodiny. Povrchový tlak: téměř nulový, teplota: ~−239 °C. Vychýlení oběžné dráhy: 0,159. Oběžná rychlost: 4,4 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Makemake_(trpasli%C4%8D%C3%AD_planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             {
                 name: "Eris",
@@ -365,7 +387,8 @@ function initSolarSystem() {
                 texture: 'textures/2k_eris_fictional.jpg',
                 color: 0xe0e0e0,
                 type: "transneptunic",
-                info: "Jedna z největších trpasličích planet. Vzdálenost od Slunce: 10,1 miliardy km. Délka dne a noci: ~25,9 hodiny. Povrchový tlak: žádný, teplota: −231 °C. Vychýlení oběžné dráhy: 0,44. Oběžná rychlost: 3,4 km/s."
+                info: `Jedna z největších trpasličích planet. Vzdálenost od Slunce: 10,1 miliardy km. Délka dne a noci: ~25,9 hodiny. Povrchový tlak: žádný, teplota: −231 °C. Vychýlení oběžné dráhy: 0,44. Oběžná rychlost: 3,4 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Eris_(trpasli%C4%8D%C3%AD_planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             {
                 name: "Halleyova kometa",
@@ -378,7 +401,8 @@ function initSolarSystem() {
                 color: 0xffffff,
                 type: "comet",
                 preview: 'textures/Halley.jpg',
-                info: "Nejslavnější periodická kometa. Oběh kolem Slunce: 75 let. Vzdálenost od Slunce: 0,6–35 AU. Teplota: ~−70 °C až −220 °C. Vychýlení oběžné dráhy: 0,967. Retrográdní oběžná rychlost: ~54 km/s v perihéliu."
+                info: `Nejslavnější periodická kometa. Oběh kolem Slunce: 75 let. Vzdálenost od Slunce: 0,6–35 AU. Teplota: ~−70 °C až −220 °C. Vychýlení oběžné dráhy: 0,967. Retrográdní oběžná rychlost: ~54 km/s v perihéliu.
+                    <br><a href="https://cs.wikipedia.org/wiki/Halleyova_kometas" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             {
                 name: "Hale-Boppova kometa",
@@ -391,7 +415,8 @@ function initSolarSystem() {
                 color: 0xccffff,
                 type: "comet",
                 preview: 'textures/HB.jpg',
-                info: "Jasná a výrazná kometa viditelná v roce 1997. Vzdálenost od Slunce: až 370 AU. Délka oběhu: ~2533 let. Vychýlení oběžné dráhy: 0,995. Teplota: ~−200 °C. Rychlost u Slunce: až 45 km/s."
+                info: `Jasná a výrazná kometa viditelná v roce 1997. Vzdálenost od Slunce: až 370 AU. Délka oběhu: ~2533 let. Vychýlení oběžné dráhy: 0,995. Teplota: ~−200 °C. Rychlost u Slunce: až 45 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/Hale-Bopp" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             {
                 name: "Enckeova kometa",
@@ -404,7 +429,8 @@ function initSolarSystem() {
                 color: 0xdddddd,
                 type: "comet",
                 preview: 'textures/Encke.png',
-                info: "Kometa s nejkratší známou periodou (~3,3 roku). Vzdálenost od Slunce: 0,34–4,1 AU. Teplota: až 300 °C v perihéliu. Vychýlení oběžné dráhy: 0,85. Rychlost: až 70 km/s."
+                info: `Kometa s nejkratší známou periodou (~3,3 roku). Vzdálenost od Slunce: 0,34–4,1 AU. Teplota: až 300 °C v perihéliu. Vychýlení oběžné dráhy: 0,85. Rychlost: až 70 km/s.
+                    <br><a href="https://cs.wikipedia.org/wiki/2P/Encke" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
             {
                 name: "Kohoutkova kometa",
@@ -417,7 +443,8 @@ function initSolarSystem() {
                 color: 0xddddff,
                 type: "comet",
                 preview: 'textures/Kohoutek.jpg',
-                info: "Slavná kometa pozorovaná v roce 1973. Velmi výstřední dráha (téměř parabolická). Oběžná doba: ~75 000 let. Vzdálenost od Slunce: až 350 AU. Vychýlení dráhy: 0,999."
+                info: `Slavná kometa pozorovaná v roce 1973. Velmi výstřední dráha (téměř parabolická). Oběžná doba: ~75 000 let. Vzdálenost od Slunce: až 350 AU. Vychýlení dráhy: 0,999.
+                    <br><a href="https://cs.wikipedia.org/wiki/Kohoutkova_kometa" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             }
         ];
 
@@ -520,7 +547,8 @@ function initSolarSystem() {
                 speed: moonSpeed,
                 initialAngle: 0,
                 preview: 'textures/Moon.gif',
-                info: "Měsíc je přirozený satelit Země. Obíhá ji ve vzdálenosti ~384 400 km. Oběžná doba: 27,3 dní."
+                info: `Měsíc je přirozený satelit Země. Obíhá ji ve vzdálenosti ~384 400 km. Oběžná doba: 27,3 dní.
+                    <br><a href="https://cs.wikipedia.org/wiki/M%C4%9Bs%C3%ADc" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             };
             scene.add(moon);
             planets.push(moon);
@@ -934,3 +962,37 @@ function createCometTail(comet) {
     comet.add(tail);
     comet.userData.tail = tail;
 }
+
+const music = document.getElementById('background-music');
+const toggleBtn = document.getElementById('toggle-music');
+const volumeSlider = document.getElementById('volume-slider');
+
+window.addEventListener('click', () => {
+    if (music.paused) {
+        music.play().catch(() => {});
+    }
+}, { once: true });
+
+toggleBtn.addEventListener('click', () => {
+    if (music.muted) {
+        music.muted = false;
+        toggleBtn.classList.remove('muted');
+        toggleBtn.textContent = '🎵';
+    } else {
+        music.muted = true;
+        toggleBtn.classList.add('muted');
+        toggleBtn.textContent = '🔇';
+    }
+});
+
+volumeSlider.addEventListener('input', () => {
+    music.volume = volumeSlider.value;
+    if (music.volume === 0) {
+        toggleBtn.classList.add('muted');
+        toggleBtn.textContent = '🔇';
+    } else {
+        music.muted = false;
+        toggleBtn.classList.remove('muted');
+        toggleBtn.textContent = '🎵';
+    }
+});
