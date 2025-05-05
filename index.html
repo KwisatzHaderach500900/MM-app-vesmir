@@ -18,7 +18,7 @@
 </head>
 <body>
     <header>
-        <h1>3D pohled na sluneční soustavu</h1>
+        <h1>🌠 Interaktivní model Sluneční soustavy</h1>
         <div id="music-control">
             <button id="toggle-music" title="Přepnout hudbu">🎵</button>
             <label for="volume-slider"></label><input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
@@ -69,6 +69,29 @@
             }
         }
     </script>
+    <div id="intro-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Vítej ve 3D sluneční soustavě 🌌</h2>
+            <p>
+                Tento model ti umožní interaktivně prozkoumat planety, komety a sondy naší sluneční soustavy.
+                <br>
+                Jednotlivé oběžné dráhy neodpovídají skutečnosti a mají pouze informační charakter.
+                <br>
+                Realistické zobrazení hvězdného systému je zatím v "beta testu".
+            </p>
+            <button id="start-experience">Rozumím</button>
+        </div>
+    </div>
     <script type="module" src="skript.js"></script>
+    <footer id="footer">
+        <p>© 2025 Lukáš Suchý</p>
+        <p>
+            Data: <a href="https://cs.wikipedia.org/wiki/Sluneční_soustava" target="_blank">Wikipedia</a>,
+            Textury: <a href="https://www.solarsystemscope.com/textures/" target="_blank">Solar System Scope</a>,
+            Textury: <a href="https://www.nasa.gov/" target="_blank">NASA</a>,
+            Zvuky: <a href="https://www.nasa.gov/" target="_blank">NASA</a>,
+            Zvuky: <a href="https://www.youtube.com/" target="_blank">Youtube</a>,
+        </p>
+    </footer>
 </body>
 </html>

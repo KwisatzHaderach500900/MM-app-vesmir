@@ -1,9 +1,11 @@
-body {
+html, body {
     margin: 0;
     font-family: Arial, sans-serif;
     background: #1a1a1a;
     color: white;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
 }
 
 header {
@@ -34,8 +36,8 @@ nav ul li a {
     cursor: grab;
     -webkit-user-select: none;
     user-select: none;
+    height: calc(100vh - 60px - 60px);
     width: 100vw;
-    height: calc(100vh - 80px);
     position: relative;
 }
 
@@ -60,7 +62,7 @@ canvas {
     gap: 10px;
     background: rgba(42, 42, 42, 0.8);
     border-radius: 8px;
-    max-width: 90%;
+    max-width: 100%;
 }
 
 .controls button {
@@ -280,4 +282,71 @@ canvas {
     0%   { transform: scale(1); }
     50%  { transform: scale(1.2); }
     100% { transform: scale(1); }
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: #111;
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+    max-width: 500px;
+    font-family: sans-serif;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.modal-content button {
+    margin-top: 20px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    background: #00ff9d;
+    border: none;
+    border-radius: 8px;
+    color: black;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.modal-content button:hover {
+    background: #00cc88;
+}
+#footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #111;
+    color: #aaa;
+    text-align: center;
+    font-size: 0.7rem;
+    padding: 1px;
+    border-top: 1px solid #333;
+    font-family: sans-serif;
+    z-index: 1000;
+}
+
+
+#footer a {
+    color: #00ff9d;
+    text-decoration: none;
+}
+
+#footer a:hover {
+    text-decoration: underline;
 }

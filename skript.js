@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 
 let scene, camera, renderer, sun;
 let solarSystemContainer;
@@ -483,7 +484,22 @@ function initSolarSystem() {
                 materialOptions.emissive = new THREE.Color(config.emissive);
                 materialOptions.emissiveIntensity = config.emissiveIntensity || 0.2;
             }
-
+            if (config.glbPath) {
+                const loader = new GLTFLoader();
+                loader.load(config.glbPath, (gltf) => {
+                    const voyagerMesh = gltf.scene;
+                    voyagerMesh.scale.set(1, 1, 1);
+                    const position = getPlanetPosition(config, now);
+                    voyagerMesh.position.set(position.x, 0, position.z);
+                    voyagerMesh.userData = { ...config, initialTime: now };
+                    scene.add(voyagerMesh);
+                    planets.push(voyagerMesh);
+                    createObjectList(planets);
+                }, undefined, (error) => {
+                    console.error("Chyba při načítání Voyageru:", error);
+                });
+                return null;
+            }
             function createDeformedCometGeometry(radius) {
                 const geometry = new THREE.SphereGeometry(radius, 16, 16);
                 const positionAttribute = geometry.attributes.position;
@@ -551,7 +567,7 @@ function initSolarSystem() {
                 createCometTail(planet);
             }
             return planet;
-        });
+        }).filter(p => p !== null);
 
         const earth = planets.find(p => p.userData.name === "Země");
         if (earth) {
@@ -582,7 +598,9 @@ function initSolarSystem() {
         sun = planets.find(p => p.userData.type === "star");
         currentCameraTarget = sun;
 
-        createObjectList(planets);
+        if (!planets.some(p => p.userData?.glbPath)) {
+            createObjectList(planets);
+        }
         scene.add(new THREE.AmbientLight(0xffffff, 0.5));
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(5, 5, 5);
@@ -810,8 +828,10 @@ function animate(timestamp) {
         highlightHalo.scale.set(scaleFactor, scaleFactor, scaleFactor);
     }
 }
-initSolarSystem();
-
+document.getElementById('start-experience').addEventListener('click', () => {
+    document.getElementById('intro-modal').style.display = 'none';
+    initSolarSystem();
+});
 /*function drawRaycasterRay(raycaster) {
     const origin = raycaster.ray.origin;
     const direction = raycaster.ray.direction.clone().normalize().multiplyScalar(10000);
