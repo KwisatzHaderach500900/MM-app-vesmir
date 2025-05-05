@@ -205,7 +205,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_sun.jpg',
                 color: 0xffff00,
                 type: "star",
-                info: `Tak asi Slunce ne? Hvězda kámo, prostě jedinej a pravej bůh všech opic z planety Země. 
+                info: `Slunce. Jediná a dokonalá hvězda, která nám dovolila vzniknout v nehostinných podmínkách vesmíru. A aktuálně asi jediná hvězda, ke které se v blízké budoucnosti marnotratné lidstvo vypraví.
                 <br><a href="https://cs.wikipedia.org/wiki/Slunce" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>
                 <br>
                 <br>
