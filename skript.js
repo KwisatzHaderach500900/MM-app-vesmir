@@ -492,6 +492,13 @@ function initSolarSystem() {
                     const position = getPlanetPosition(config, now);
                     voyagerMesh.position.set(position.x, 0, position.z);
                     voyagerMesh.userData = { ...config, initialTime: now };
+                    //klikani na model je takove osemetne. Sklada se totiz
+                    //z nekolika casti, ktere bych musel definovat samostatne nebo predelat
+                    //model, aby se tvaril jako jeden objekt, jednodussi je (pro ted)
+                    //Voyager z klikani vynechat
+                    voyagerMesh.traverse(child => {
+                        child.userData.ignoreClick = true;
+                    });
                     scene.add(voyagerMesh);
                     planets.push(voyagerMesh);
                     createObjectList(planets);
@@ -788,8 +795,7 @@ function animate(timestamp) {
                 const sunWorldPos = new THREE.Vector3();
                 sun.getWorldPosition(sunWorldPos);
                 const direction = new THREE.Vector3().subVectors(cometWorldPos, sunWorldPos).normalize();
-                const angle = Math.atan2(direction.x, direction.z);
-                planet.userData.tail.material.rotation = angle;
+                planet.userData.tail.material.rotation = Math.atan2(direction.x, direction.z);
             }
             if (data.type === "moon" && data.parent) {
                 const parentPos = new THREE.Vector3();
