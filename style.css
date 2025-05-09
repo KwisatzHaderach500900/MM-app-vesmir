@@ -1,5 +1,6 @@
 html, body {
     margin: 0;
+    padding: 0;
     font-family: Arial, sans-serif;
     background: #1a1a1a;
     color: white;
@@ -36,7 +37,8 @@ nav ul li a {
     cursor: grab;
     -webkit-user-select: none;
     user-select: none;
-    height: calc(100vh - 60px - 60px);
+    height: 100vh;
+    /*height: calc(100vh - 60px - 60px);*/
     width: 100vw;
     position: relative;
 }
@@ -132,12 +134,16 @@ canvas {
     right: 0;
     display: flex;
     flex-direction: row;
-    gap: 12px;
+    gap: 10px;
     z-index: 1000;
     align-items: flex-start;
     background: rgba(0, 0, 0, 0.5);
-    padding: 10px;
-    border-radius: 8px;
+    padding: 10px 0 10px 10px;
+    border-radius: 8px 0 0 8px;
+    transition: transform 0.4s ease;
+}
+#side-panels.collapsed {
+    transform: translateX(100%);
 }
 
 #info-panel {
@@ -301,7 +307,7 @@ canvas {
     border-radius: 10px;
     text-align: center;
     color: white;
-    max-width: 500px;
+    max-width: 800px;
     font-family: sans-serif;
     box-shadow: 0 0 20px rgba(255,255,255,0.2);
 }
@@ -349,4 +355,23 @@ canvas {
 
 #footer a:hover {
     text-decoration: underline;
+}
+#toggle-side-panels {
+    position: relative;
+    left: -40px;
+    top: 0;
+    height: 100%;
+    width: 30px;
+    background: #00ff9d;
+    border: none;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px 0 0 8px;
+    transition: background 0.3s;
+    z-index: 1001;
+}
+
+#toggle-side-panels:hover {
+    background: #00cc88;
 }

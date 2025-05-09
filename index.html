@@ -41,6 +41,7 @@
         <div id="speed-display">🔄 Rychlost: 1×</div>
     </div>
     <div id="side-panels">
+        <button id="toggle-side-panels" title="Skrýt/zobrazit panel">📁</button>
         <div id="info-panel" class="info-panel hidden">
             <div class="popup-title">🪐 Objekt</div>
             <img id="info-image" src="" alt="" style="width: 150px; height: 150px; margin: 10px 0; object-fit: cover; border-radius: 8px;">
@@ -71,13 +72,22 @@
     </script>
     <div id="intro-modal" class="modal-overlay">
         <div class="modal-content">
-            <h2>Vítej ve 3D modelu sluneční soustavy 🌌</h2>
+            <h2>Vítej ve 3D modelu sluneční soustavy</h2>
             <p>
                 Tento model ti umožní interaktivně prozkoumat planety, komety a sondy naší sluneční soustavy.
                 <br>
                 Jednotlivé oběžné dráhy neodpovídají skutečnosti a mají pouze informační charakter.
                 <br>
                 Realistické zobrazení hvězdného systému je zatím v "beta testu".
+                <br>
+                <br>
+                <b>Ovládání (🔃 ⏪ ⏸️ ▶️ ⏩ 🔁) v horní části obrazovky slouží ke zrychlení či zpomalení pohybu celého systému (rotací planet, oběhů po oběžných drahách). Maximální rychlost je 100, což odpovídá 100 reálným dnům za sekundu.<b>
+                <br><br>
+                <b>Je zde také možnost ztlumit hudbu, či ji úplně vypnout (🎵).</b>
+                <br><br>
+                <b>Postranní menu slouží k pohybu k jednotlivýcm planetám a k otevření informačního podokna. Je také možno kliknout v 3D zobrazení na určitou planetu a kamera přeletí k ní, bez otevření informačního podokna.</b>
+                <br><br>
+                    <b>Modré oběžné dráhy jsou dráhy planet, červené jsou planetky, žluté jsou komety. Sondy jsou bez oběžných drah.</b>
             </p>
             <button id="start-experience">Rozumím</button>
         </div>

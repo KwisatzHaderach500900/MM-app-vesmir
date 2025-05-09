@@ -30,6 +30,7 @@ let highlightEnabled = false;
 let highlightedObject = null;
 let orbitsVisible = true;
 const orbitLines = [];
+let radius;
 
 /*class PlanetTrail {
     constructor(color) {
@@ -109,12 +110,15 @@ function focusOnPlanet(planetMesh) {
     currentCameraTarget = planetMesh;
     currentCameraPosition.copy(camera.position);
 
-    if (planetMesh === sun) {
-        cameraRadius = 300;
+    if (planetMesh.userData.cameraDistance) {
+        cameraRadius = planetMesh.userData.cameraDistance;
+    } else if (planetMesh === sun) {
+        cameraRadius = 20 * 15;
     } else {
-        cameraRadius = planetMesh.userData.radius * 15;
+        radius = planetMesh.userData.radius || 5;
+        cameraRadius = Math.max(minDistance, radius * 15);
     }
-    cameraRadius = Math.max(minDistance, cameraRadius);
+
     const worldPos = new THREE.Vector3();
     planetMesh.getWorldPosition(worldPos);
     updateCameraPosition(planetMesh);
@@ -144,7 +148,7 @@ function initSolarSystem() {
         scene = new THREE.Scene();
         const textureLoader = new THREE.TextureLoader();
 
-        const backgroundGeometry = new THREE.SphereGeometry(6500, 64, 64);
+        const backgroundGeometry = new THREE.SphereGeometry(8500, 64, 64);
         const backgroundMaterial = new THREE.MeshBasicMaterial({
             map: textureLoader.load('textures/1567215018748-ESA_Gaia_DR2_AllSky_Brightness_Colour_Cartesian_2000x1000.png'),
             side: THREE.BackSide,
@@ -158,7 +162,7 @@ function initSolarSystem() {
         scene.add(background);
 
         camera = new THREE.PerspectiveCamera(
-            75,
+            40,
             solarSystemContainer.clientWidth / solarSystemContainer.clientHeight,
             0.1,
             100000
@@ -218,7 +222,7 @@ function initSolarSystem() {
                 </audio>`,
                 preview: 'textures/Sun.jpg',
                 emissive: 0xffffee,
-                emissiveIntensity: 0.1
+                emissiveIntensity: 0.7
             },
             { name: "Merkur",
                 radius: 3.5,
@@ -362,6 +366,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_haumea_fictional.jpg',
                 color: 0xddddff,
                 type: "transneptunic",
+                preview: 'textures/nodata.png',
                 info: `Trpasličí planeta s protáhlým tvarem. Vzdálenost od Slunce: 6,4 miliardy km. Délka dne a noci: 3,9 hodiny (nejrychlejší rotace). Povrchový tlak: žádný, teplota: −241 °C. Vychýlení oběžné dráhy: 0,188. Oběžná rychlost: 4,5 km/s.
                     <br><a href="https://cs.wikipedia.org/wiki/Haumea_(trpasli%C4%8D%C3%AD_planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
@@ -375,6 +380,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_makemake_fictional.jpg',
                 color: 0xffcccc,
                 type: "transneptunic",
+                preview: 'textures/nodata.png',
                 info: `Trpasličí planeta v Kuiperově pásu. Vzdálenost od Slunce: 6,85 miliardy km. Délka dne a noci: ~7,8 hodiny. Povrchový tlak: téměř nulový, teplota: ~−239 °C. Vychýlení oběžné dráhy: 0,159. Oběžná rychlost: 4,4 km/s.
                     <br><a href="https://cs.wikipedia.org/wiki/Makemake_(trpasli%C4%8D%C3%AD_planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
@@ -388,6 +394,7 @@ function initSolarSystem() {
                 texture: 'textures/2k_eris_fictional.jpg',
                 color: 0xe0e0e0,
                 type: "transneptunic",
+                preview: 'textures/nodata.png',
                 info: `Jedna z největších trpasličích planet. Vzdálenost od Slunce: 10,1 miliardy km. Délka dne a noci: ~25,9 hodiny. Povrchový tlak: žádný, teplota: −231 °C. Vychýlení oběžné dráhy: 0,44. Oběžná rychlost: 3,4 km/s.
                     <br><a href="https://cs.wikipedia.org/wiki/Eris_(trpasli%C4%8D%C3%AD_planeta)" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
             },
@@ -457,7 +464,7 @@ function initSolarSystem() {
                 color: 0xffaa00,
                 type: "probe",
                 glbPath: "textures/voyager.glb",
-                preview: "textures/Voyager.jpg",
+                preview: "textures/Voyager.png",
                 info: `Voyager 2 je meziplanetární sonda vypuštěná NASA v roce 1977. Je jedinou sondou, která navštívila všechny čtyři obří planety. V roce 2018 opustila heliosféru a nyní putuje mezihvězdným prostorem.
                 <br><a href="https://cs.wikipedia.org/wiki/Voyager_2" target="_blank" style="color:#00ff9d;">🔗 Wikipedie</a><br>
                 <br>
@@ -468,6 +475,52 @@ function initSolarSystem() {
                 <audio id="sun-audio">
                 <source src="sound/Voyager.mp3" type="audio/mpeg">
                 </audio>`
+            },
+            {
+                name: "Ha´tak",
+                radius: 1.5,
+                semiMajorAxis: 8500,
+                eccentricity: 0.05,
+                inclination: 3,
+                speed: 0.00001,
+                color: 0xffaa00,
+                type: "probe",
+                glbPath: "textures/hatak.glb",
+                preview: "textures/Hatak.png",
+                info: `Ha'tak je třída goa'uldských vesmírných lodí a kdysi byl symbolem prestiže a moci za vlády Goa'uldské říše v galaxii Mléčná dráha.
+                <br><a href="https://stargate.fandom.com/wiki/Ha%27tak" target="_blank" style="color:#00ff9d;">🔗 Fandom</a><br>
+                <br>`
+            },
+            {
+                name: "Al'kesh",
+                radius: 0.8,
+                semiMajorAxis: 8500,
+                eccentricity: 0.08,
+                inclination: 5,
+                speed: 0.00001,
+                color: 0xffaa00,
+                type: "probe",
+                glbPath: "textures/alkesh.glb",
+                preview: "textures/alkesh.jpg",
+                info: `Al'kesh je výkonný goa'uldský bombardér středního doletu a transportér, používaný k útokům na opevněné pozice na planetárním povrchu a sloužící jako podpůrná role během invazí Goa´uldských vládců. Je větší než průzkumná loď Tel'tak a Death Glider, ale mnohem menší než mateřská loď Ha'tak. Po porážce Goa'uldů byl Al'kesh používán také kulturami, které byly dříve pod nadvládou Goa'uldů, jako například Jaffové a Lucijská aliance.
+                <br><a href="https://stargate.fandom.com/wiki/Al%27kesh" target="_blank" style="color:#00ff9d;">🔗 Fandom</a><br>
+                <br>`
+            },
+            {
+                name: "Rukavice Eda Whitea",
+                type: "moon",
+                glbPath: "textures/glove.glb",
+                preview: "textures/glove.png",
+                parentName: "Země",
+                orbitRadius: 10,
+                speed: THREE.MathUtils.degToRad(4.5),
+                initialAngle: Math.random() * Math.PI * 2,
+                cameraDistance: 0.8,
+                info: `Rukavice ztracená Edem Whitem během výstupu do volného prostoru v roce 1965. Dodnes obíhá Zemi jako miniaturní kus vesmírného odpadu.
+    <br>
+    <a href="https://en.wikipedia.org/wiki/Edward_Higgins_White" target="_blank" style="color:#00ff9d;">Více o Edovi Whiteovi</a>
+    <br><br>
+    <a href="https://spacecenter.org/mission-monday-five-fast-facts-about-the-first-american-spacewalk/" target="_blank" style="color:#00ff9d;">O rukavici ;)</a>`
             }
         ];
 
@@ -487,26 +540,30 @@ function initSolarSystem() {
             if (config.glbPath) {
                 const loader = new GLTFLoader();
                 loader.load(config.glbPath, (gltf) => {
-                    const voyagerMesh = gltf.scene;
-                    voyagerMesh.scale.set(1, 1, 1);
+                    const mesh = gltf.scene;
+                    mesh.scale.set(1, 1, 1);
                     const position = getPlanetPosition(config, now);
-                    voyagerMesh.position.set(position.x, 0, position.z);
-                    voyagerMesh.userData = { ...config, initialTime: now };
-                    //klikani na model je takove osemetne. Sklada se totiz
-                    //z nekolika casti, ktere bych musel definovat samostatne nebo predelat
-                    //model, aby se tvaril jako jeden objekt, jednodussi je (pro ted)
-                    //Voyager z klikani vynechat
-                    voyagerMesh.traverse(child => {
+                    mesh.position.set(position.x, 0, position.z);
+                    mesh.userData = { ...config, initialTime: now };
+
+                    if (config.type === "moon") {
+                        const parent = planets.find(p => p.userData.name === config.parentName);
+                        if (parent) mesh.userData.parent = parent;
+                    }
+
+                    mesh.traverse(child => {
                         child.userData.ignoreClick = true;
                     });
-                    scene.add(voyagerMesh);
-                    planets.push(voyagerMesh);
+
+                    scene.add(mesh);
+                    planets.push(mesh);
                     createObjectList(planets);
                 }, undefined, (error) => {
-                    console.error("Chyba při načítání Voyageru:", error);
+                    console.error(`Chyba při načítání ${config.name}:`, error);
                 });
                 return null;
             }
+
             function createDeformedCometGeometry(radius) {
                 const geometry = new THREE.SphereGeometry(radius, 16, 16);
                 const positionAttribute = geometry.attributes.position;
@@ -571,7 +628,8 @@ function initSolarSystem() {
             //scene.add(planet.userData.trail.line);
             scene.add(planetGroup);
             if (config.type === "comet") {
-                createCometTail(planet);
+                //createCometTail(planet);
+                createCometHalo(planet);
             }
             return planet;
         }).filter(p => p !== null);
@@ -596,7 +654,7 @@ function initSolarSystem() {
                 preview: 'textures/Moon.gif',
                 info: `Měsíc je přirozený satelit Země. Obíhá ji ve vzdálenosti ~384 400 km. Oběžná doba: 27,3 dní.
                     <br><a href="https://cs.wikipedia.org/wiki/M%C4%9Bs%C3%ADc" target="_blank" style="color:#00ff9d;">Více na Wikipedii</a>`
-            };
+            }
             scene.add(moon);
             planets.push(moon);
         }
@@ -691,8 +749,8 @@ function getMouseRaycaster(event) {
                 if (targetPlanet.userData?.type !== 'moon') {
                     focusOnPlanet(targetPlanet);
                 }
-
-                showPopupOnObject(targetPlanet);
+                //deaktivovaný infopanel při kliknutí na planetu
+                //showPopupOnObject(targetPlanet);
 
                 if (targetPlanet.userData?.type === 'star') {
                     cameraRadius = 300;
@@ -767,7 +825,13 @@ function getScreenPosition(object3D, camera, renderer) {
         y: (-vector.y * 0.5 + 0.5) * rect.height + rect.top
     };
 }
+document.getElementById('toggle-side-panels').addEventListener('click', () => {
+    const panel = document.getElementById('side-panels');
+    const button = document.getElementById('toggle-side-panels');
 
+    panel.classList.toggle('collapsed');
+    button.textContent = panel.classList.contains('collapsed') ? '📁' : '📁';
+});
 function animate(timestamp) {
     requestAnimationFrame(animate);
 
@@ -869,7 +933,7 @@ function createObjectList(objects) {
             <ul id="planet-list" class="object-sublist"></ul>
         </div>
         <div class="object-section">
-            <button class="toggle-section" data-target="transneptunic-list">🪐 Planetoidy</button>
+            <button class="toggle-section" data-target="transneptunic-list">🪐 Planetky</button>
             <ul id="transneptunic-list" class="object-sublist"></ul>
         </div>
         <div class="object-section">
@@ -880,12 +944,18 @@ function createObjectList(objects) {
             <button class="toggle-section" data-target="probe-list">🛰️ Sondy</button>
             <ul id="probe-list" class="object-sublist"></ul>
         </div>
+        <div class="object-section">
+            <button class="toggle-section" data-target="moon-list">🌕 Měsíce</button>
+            <ul id="moon-list" class="object-sublist"></ul>
+        </div>
     `;
     const starList = document.getElementById('star-list');
     const planetList = document.getElementById('planet-list');
     const transneptunicList = document.getElementById('transneptunic-list');
     const cometList = document.getElementById('comet-list');
     const probeList = document.getElementById('probe-list');
+    const moonList = document.getElementById('moon-list');
+
 
     objects.forEach(obj => {
         const item = document.createElement('li');
@@ -914,6 +984,9 @@ function createObjectList(objects) {
         else if (obj.userData.type === 'probe') {
             probeList.appendChild(item);
         }
+        else if (obj.userData.type === 'moon') {
+            moonList.appendChild(item);
+        }
         else {
             planetList.appendChild(item);
         }
@@ -932,6 +1005,7 @@ function createObjectList(objects) {
     document.getElementById('transneptunic-list').style.display = 'none';
     document.getElementById('comet-list').style.display = 'none';
     document.getElementById('probe-list').style.display = 'none';
+    document.getElementById('moon-list').style.display = 'none';
 }
 
 function setHighlightHalo(object, show = true) {
@@ -1003,7 +1077,7 @@ document.getElementById('toggle-orbits').addEventListener('click', () => {
         `✨ Orbitální čáry: ${orbitsVisible ? "Zapnuto" : "Vypnuto"}`;
 });
 
-function createCometTail(comet) {
+/*function createCometTail(comet) {
     const tailTexture = new THREE.TextureLoader().load('textures/comet_tail_texture2.png');
     const tailMaterial = new THREE.SpriteMaterial({
         map: tailTexture,
@@ -1020,6 +1094,25 @@ function createCometTail(comet) {
     tail.userData.ignoreClick = true;
     comet.add(tail);
     comet.userData.tail = tail;
+}*/
+
+function createCometHalo(comet) {
+    const texture = new THREE.TextureLoader().load('textures/fuzzyHalo.png');
+    const material = new THREE.SpriteMaterial({
+        map: texture,
+        color: 0xaaaaee,
+        transparent: true,
+        opacity: 0.25,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+    });
+    const halo = new THREE.Sprite(material);
+    const scale = comet.userData.radius * 12;
+    halo.scale.set(scale, scale, 1);
+    halo.center.set(0.5, 0.5);
+    halo.userData.ignoreClick = true;
+    comet.add(halo);
+    comet.userData.halo = halo;
 }
 
 const music = document.getElementById('background-music');
@@ -1054,4 +1147,10 @@ volumeSlider.addEventListener('input', () => {
         toggleBtn.classList.remove('muted');
         toggleBtn.textContent = '🎵';
     }
+});
+window.addEventListener('resize', () => {
+    const container = document.getElementById('solar-system-container');
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
 });
