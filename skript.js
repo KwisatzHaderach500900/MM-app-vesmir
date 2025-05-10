@@ -31,6 +31,8 @@ let highlightedObject = null;
 let orbitsVisible = true;
 const orbitLines = [];
 let radius;
+let initialPinchDistance = null;
+let lastPinchZoom = cameraRadius;
 
 /*class PlanetTrail {
     constructor(color) {
@@ -732,6 +734,69 @@ function getMouseRaycaster(event) {
             cameraRadius = Math.min(maxDistance, Math.max(minDistance, cameraRadius + event.deltaY * -0.1));
         };
 
+        function onTouchStart(event) {
+            if (event.touches.length === 1) {
+                isDragging = true;
+                previousMousePosition = {
+                    x: event.touches[0].clientX,
+                    y: event.touches[0].clientY
+                };
+            }
+        }
+
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function onTouchMove(event) {
+            if (event.touches.length === 1 && isDragging) {
+                const deltaMove = {
+                    x: event.touches[0].clientX - previousMousePosition.x,
+                    y: event.touches[0].clientY - previousMousePosition.y
+                };
+
+                cameraTheta += deltaMove.x * cameraSpeed;
+                cameraPhi -= deltaMove.y * cameraSpeed;
+                cameraPhi = Math.max(0.1, Math.min(Math.PI - 0.1, cameraPhi));
+
+                previousMousePosition = {
+                    x: event.touches[0].clientX,
+                    y: event.touches[0].clientY
+                };
+
+                event.preventDefault();
+            }
+
+            if (event.touches.length === 2) {
+                const distance = getDistance(event.touches[0], event.touches[1]);
+
+                if (initialPinchDistance === null) {
+                    initialPinchDistance = distance;
+                    lastPinchZoom = cameraRadius;
+                } else {
+                    const zoomFactor = initialPinchDistance / distance;
+                    cameraRadius = lastPinchZoom * zoomFactor;
+
+                    // Omezíme rozsah zoomu
+                    cameraRadius = Math.max(minDistance, Math.min(maxDistance, cameraRadius));
+                }
+
+                event.preventDefault();
+            }
+        }
+
+
+        function onTouchEnd(event) {
+            isDragging = false;
+            if (event.touches.length < 2) {
+                initialPinchDistance = null;
+            }
+        }
+        solarSystemContainer.addEventListener('touchstart', onTouchStart, { passive: false });
+        solarSystemContainer.addEventListener('touchmove', onTouchMove, { passive: false });
+        solarSystemContainer.addEventListener('touchend', onTouchEnd);
         solarSystemContainer.addEventListener('mousedown', onMouseDown);
         solarSystemContainer.addEventListener('mouseup', onMouseUp);
         solarSystemContainer.addEventListener('mouseleave', onMouseUp);
