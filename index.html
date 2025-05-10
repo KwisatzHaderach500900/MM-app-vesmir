@@ -19,10 +19,6 @@
 <body>
     <header>
         <h1>🌠 Interaktivní model Sluneční soustavy</h1>
-        <div id="music-control">
-            <button id="toggle-music" title="Přepnout hudbu">🎵</button>
-            <label for="volume-slider"></label><input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
-        </div>
 
         <audio id="background-music" loop>
             <source src="sound/background.mp3" type="audio/mpeg">
@@ -30,17 +26,21 @@
         </audio>
     </header>
     <div class="controls">
-        <button id="reload-page" title="Načíst znovu">🔃 Znovu načíst stránku</button>
-        <button id="slow-down10" title="Zpomalit x10">10x ⏪</button>
-        <button id="slow-down" title="Zpomalit">1x ⏪</button>
-        <button id="stop" title="Zastavit">⏸️</button>
-        <button id="start" title="Spustit">▶️</button>
-        <button id="speed-up" title="Zrychlit">1x ⏩</button>
-        <button id="speed-up10" title="Zrychlit x10">10x ⏩</button>
-        <button id="reset-speed" title="Reset rychlosti">reset 🔁</button>
-        <div id="speed-display">🔄 Rychlost: 1×</div>
+        <button id="reload-page" title="Načíst znovu">🔃<span> Znovu načíst stránku</span></button>
+        <button id="slow-down10" title="Zpomalit x10"><span>10x </span>⏪</button>
+        <button id="slow-down" title="Zpomalit"><span>1x </span>⏪</button>
+        <button id="stop" title="Zastavit"><span></span>⏸️</button>
+        <button id="start" title="Spustit"><span></span>▶️</button>
+        <button id="speed-up" title="Zrychlit"><span>1x </span>⏩</button>
+        <button id="speed-up10" title="Zrychlit x10"><span>10x </span>⏩</button>
+        <button id="reset-speed" title="Reset rychlosti"><span>reset </span>🔁</button>
+        <div id="music-control">
+            <button id="toggle-music" title="Přepnout hudbu">🎵</button>
+            <label for="volume-slider"></label><input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+        </div>
+        <div id="speed-display"><span>Sim Speed: 1×</span></div>
     </div>
-    <div id="side-panels">
+    <div id="side-panels" class="collapsed">
         <button id="toggle-side-panels" title="Skrýt/zobrazit panel">📁</button>
         <div id="info-panel" class="info-panel hidden">
             <div class="popup-title">🪐 Objekt</div>
@@ -94,7 +94,7 @@
     </div>
     <script type="module" src="skript.js"></script>
     <footer id="footer">
-        <p>© 2025 Lukáš Suchý, version v0.9.5.2 (<i>BETATEST</i>), <a href="https://github.com/KwisatzHaderach500900/MM-app-vesmir" target="_blank">GitHub</a></p>
+        <p>© 2025 Lukáš Suchý, version v0.9.5.3, <a href="https://github.com/KwisatzHaderach500900/MM-app-vesmir" target="_blank">GitHub</a></p>
         <p>Betatest: Markétka a Janička</p>
         <p>
             Data: <a href="https://cs.wikipedia.org/wiki/Sluneční_soustava" target="_blank">Wikipedia</a>,

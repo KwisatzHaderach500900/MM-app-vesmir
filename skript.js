@@ -685,6 +685,12 @@ function initSolarSystem() {
             isDragging = true;
             previousMousePosition = { x: event.clientX, y: event.clientY };
         };
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('solar-system-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
 function getMouseRaycaster(event) {
             const canvas = renderer.domElement;
             const rect = canvas.getBoundingClientRect();
@@ -764,7 +770,7 @@ function getMouseRaycaster(event) {
 function updateSpeedDisplay() {
             const speedDisplay = document.getElementById('speed-display');
             if (speedDisplay) {
-                speedDisplay.innerText = `🔄 Rychlost: ${speedFactor.toFixed(0)}×`;
+                speedDisplay.innerText = `Sim Speed: ${speedFactor.toFixed(0)}×`;
             }
         }
         document.getElementById('speed-up').addEventListener('click', () => {
@@ -1147,10 +1153,4 @@ volumeSlider.addEventListener('input', () => {
         toggleBtn.classList.remove('muted');
         toggleBtn.textContent = '🎵';
     }
-});
-window.addEventListener('resize', () => {
-    const container = document.getElementById('solar-system-container');
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
 });
